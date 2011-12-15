@@ -1,3 +1,5 @@
+require 'nokogiri'
+
 module Bozo::Compilers
 
   class Msbuild
@@ -65,7 +67,16 @@ module Bozo::Compilers
         args = []
         config = configuration
         
-        config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', project_name))
+        framework_version = 'net35'
+        
+        File.open(project_file) do |f|        
+          framework_version = Nokogiri::XML(f).css('Project PropertyGroup TargetFrameworkVersion').first.content
+          puts framework_version
+          framework_version = framework_version.sub('v', 'net').sub('.', '')
+          puts framework_version
+        end
+        
+        config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', project_name, framework_version))
         
         args << File.join(ENV['WINDIR'], 'Microsoft.NET', config[:framework], config[:version], 'msbuild.exe')
         args << '/nologo'
