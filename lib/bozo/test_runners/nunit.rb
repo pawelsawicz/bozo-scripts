@@ -25,7 +25,7 @@ module Bozo::TestRunners
     def execute
       args = []
       
-      nunit_runners = Dir[File.expand_path(File.join('packages', 'NUnit*', 'tools', 'nunit-console.exe'))]
+      nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', 'nunit-console.exe')
       
       log_and_die 'No NUnit runners found. You must install one via nuget.' if nunit_runners.empty?
       log_and_die 'Multiple NUnit runners found. There should only be one.' if nunit_runners.size > 1
@@ -36,14 +36,14 @@ module Bozo::TestRunners
       
       args << nunit_runner
       @projects.each do |project|
-        Dir[File.expand_path(File.join('temp', 'msbuild', project, '**', "#{project}.dll"))].each do |test_dll|
+        expand_and_glob('temp', 'msbuild', project, '**', "#{project}.dll").each do |test_dll|
           args << "\"#{test_dll}\""
         end
       end
       args << '/nologo'
             
       report_path = @report_path
-      report_path = File.expand_path(File.join('temp', 'nunit', 'nunit-report.xml')) unless report_path
+      report_path = expand_path('temp', 'nunit', 'nunit-report.xml') unless report_path
       
       # Ensure the directory is there because NUnit won't make it
       FileUtils.mkdir_p File.dirname(report_path)
@@ -51,6 +51,14 @@ module Bozo::TestRunners
       args << "/xml:\"#{report_path}\""
       
       Bozo.execute_command :nunit, args
+    end
+    
+    def expand_path(*args)
+      File.expand_path(File.join(args))
+    end
+    
+    def expand_and_glob(*args)
+      Dir[expand_path(*args)]
     end
     
     def log_and_die(msg)
