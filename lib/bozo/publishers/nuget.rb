@@ -39,7 +39,7 @@ module Bozo::Publishers
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
           doc.metadata do
             doc.id project
-            doc.version '0.0.0'
+            doc['version'] = '0.0.0'
             doc.authors 'Zopa'
             doc.description project
             doc.projectUrl 'http://www.zopa.com'
