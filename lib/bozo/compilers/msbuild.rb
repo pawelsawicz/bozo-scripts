@@ -67,13 +67,11 @@ module Bozo::Compilers
         args = []
         config = configuration
         
-        framework_version = 'net35'
+        framework_version = 'unknown'
         
         File.open(project_file) do |f|        
           framework_version = Nokogiri::XML(f).css('Project PropertyGroup TargetFrameworkVersion').first.content
-          puts framework_version
           framework_version = framework_version.sub('v', 'net').sub('.', '')
-          puts framework_version
         end
         
         config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', project_name, framework_version))

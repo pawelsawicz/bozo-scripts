@@ -46,8 +46,8 @@ module Bozo::Publishers
             doc.licenseUrl 'http://www.zopa.com'
           end
           doc.files do
-            doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '*.dll')).gsub(/\//, '\\'), :target => 'lib\net35')
-            doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '*.pdb')).gsub(/\//, '\\'), :target => 'lib\net35')
+            doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.dll')).gsub(/\//, '\\'), :target => 'lib')
+            doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.pdb')).gsub(/\//, '\\'), :target => 'lib')
           end
         end
       end
