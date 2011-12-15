@@ -36,7 +36,9 @@ module Bozo::TestRunners
       
       args << nunit_runner
       @projects.each do |project|
-        args << "\"#{File.expand_path(File.join('temp', 'msbuild', project, "#{project}.dll"))}\""
+        Dir[File.expand_path(File.join('temp', 'msbuild', project, '**', "#{project}.dll"))].each do |test_dll|
+          args << "\"#{test_dll}\""
+        end
       end
       args << '/nologo'
             
