@@ -83,7 +83,7 @@ module Bozo::Compilers
         args << "/target:#{config[:targets].map{|t| t.to_s}.join(';')}"
         
         config[:properties].each do |key, value|
-          args << "/property:#{key}=#{value}"
+          args << "/property:#{key}=\"#{value}\""
         end
         
         args << "\"#{project_file}\""
