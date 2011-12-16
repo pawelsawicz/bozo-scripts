@@ -14,11 +14,11 @@ module Bozo::Hooks
       Bozo.log_debug "Path: #{path}"
       
       File.open(path, 'w+') do |f|
-        f << "using System.Reflection;"
-        f << "[assembly: AssemblyCompany(\"Zopa\")]"
-        f << "[assembly: AssemblyVersion(\"#{version}\")]"
-        f << "[assembly: AssemblyFileVersion(\"#{version}\")]"
-        f << "[assembly: AssemblyTrademark(\"#{git_hash}\")]"
+        f << "using System.Reflection;\n"
+        f << "[assembly: AssemblyCompany(\"Zopa\")]\n"
+        f << "[assembly: AssemblyVersion(\"#{version}\")]\n"
+        f << "[assembly: AssemblyFileVersion(\"#{version}\")]\n"
+        f << "[assembly: AssemblyTrademark(\"#{git_hash}\")]\n"
       end
     end
     
