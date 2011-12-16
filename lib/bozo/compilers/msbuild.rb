@@ -75,6 +75,7 @@ module Bozo::Compilers
         end
         
         config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', project_name, framework_version))
+        config[:properties][:solutiondir] = File.expand_path('.')
         
         args << File.join(ENV['WINDIR'], 'Microsoft.NET', config[:framework], config[:version], 'msbuild.exe')
         args << '/nologo'
