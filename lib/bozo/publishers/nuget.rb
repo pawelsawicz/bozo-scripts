@@ -39,7 +39,7 @@ module Bozo::Publishers
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
           doc.metadata do
             doc.id project
-            doc.version_ "#{Bozo::Configuration.version}-#{ENV['BOZO_GIT_HASH']}" # Need to know if a 'proper' build and then not add hash
+            doc.version_ "#{Bozo::Configuration.version}-#{Bozo::ENV['GIT_HASH']}" # Need to know if a 'proper' build and then not add hash
             doc.authors 'Zopa'
             doc.description project
             doc.projectUrl 'http://www.zopa.com'
