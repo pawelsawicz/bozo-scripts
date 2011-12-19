@@ -2,32 +2,49 @@ module Bozo::Hooks
 
   class FxCop
 
+    def fxcop_dir
+      File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
+    end
+
     def post_compile
-      out_path = File.expand_path(File.join('temp', 'fxcop'))
+      out_path = File.expand_path File.join('temp', 'fxcop')
       FileUtils.mkdir_p out_path
-      args = []
 
-      args << '"' + File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe') + '"'
+      framework_versions = [:net35, :net40]
 
-      projects = project_files('src') | project_files('test')
+      framework_versions.each do |framework_version|
+        args = []
+        args << '"' + fxcop_dir + '"'
+        args << "/out:#{out_path}\\FxCop-#{framework_version}-Results.xml"
 
-      projects.each do |project_file|
-        project_name = File.basename(project_file).gsub(/\.csproj$/, '')
-        project_path = File.expand_path(File.join('temp', 'msbuild', project_name, 'net35', project_name)).gsub(/\//, '\\')
-        args << "/file:\"#{project_path}.dll\""
+        project_dirs.each do |project|
+          projects = project_files(project, framework_version)
+
+          projects.each do |project_file|
+            puts project_file
+
+            project_path = File.expand_path(project_file).gsub(/\//, '\\')
+            args << "/file:\"#{project_path}\""
+          end
+        end
+
+        Bozo.execute_command :fx_cop, args
       end
-
-      args << "/out:#{out_path}\\FxCopResults.xml"
-
-      Bozo.execute_command :fx_cop, args
     end
 
     def required_tools
       :fx_cop
     end
 
-    def project_files(directory)
-      project_file_matcher = File.expand_path(File.join(directory, 'csharp', '**', '*.csproj'))
+    def project_files(project_path, framework_version)
+      project_name = File.basename(project_path)
+      # TODO: add support for .exe
+      project_file_matcher = File.expand_path File.join(project_path, framework_version.to_s, "#{project_name}.dll")
+      Dir[project_file_matcher]
+    end
+
+    def project_dirs()
+      project_file_matcher = File.expand_path File.join('temp', 'msbuild', '*')
       Dir[project_file_matcher]
     end
 
