@@ -22,13 +22,9 @@ module Bozo::Hooks
     def post_test
       return unless Teamcity.hosted_in_teamcity?
 
-      valid_test_types = [:junit, :surefire, :nunit, :findBugs, :pmd, :checkstyle, :pmdCpd, :mstest, :gtest, :jslint,
-        :dotNetCoverage, :ReSharperDupFinder, :FxCop]
-
-      valid_test_types.each do |t|
-        report_path = File.expand_path(File.join(Dir.pwd, "/temp/#{t}/#{t}-report.xml"))
-        puts "##teamcity[importData type='#{t}' path='#{report_path}']" if (File.exists? report_path)
-      end
+      # only supporting nunit at present
+      report_path = File.expand_path(File.join(Dir.pwd, "/temp/nunit/#{t}-report.xml"))
+      puts "##teamcity[importData type='#{t}' path='#{report_path}']" if File.exist? report_path
 
       log_post_step 'test'
     end
