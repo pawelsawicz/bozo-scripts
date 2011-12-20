@@ -32,15 +32,10 @@ module Bozo::Hooks
       end
     end
 
-    def required_tools
-      :fx_cop
-    end
-
     def project_files(project_path, framework_version)
       project_name = File.basename(project_path)
-      # TODO: add support for .exe
-      project_file_matcher = File.expand_path File.join(project_path, framework_version.to_s, "#{project_name}.dll")
-      Dir[project_file_matcher]
+      file_matcher = File.expand_path File.join(project_path, framework_version.to_s, "#{project_name}.{dll,exe}")
+      Dir[file_matcher]
     end
 
     def project_dirs()
