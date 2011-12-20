@@ -70,7 +70,7 @@ module Bozo::Hooks
         args = []
         args << '"' + config[:path] + '"'
         args << "/out:#{output_path}\\FxCop-#{framework_version}-Results.xml"
-        args << "/types:" + config[:types].join(',') if config[:types].length > 0
+        args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
         project_dirs.each do |project|
           projects = project_files(project, framework_version)
@@ -94,7 +94,7 @@ module Bozo::Hooks
       args << '"' + config[:path] + '"'
       args << "/out:\"#{output_path}\\FxCop-#{File.basename(config[:project], '.*')}-Results.xml\""
       args << "/project:\"#{config[:project]}\""
-      args << "/types:" + config[:types].join(',') if config[:types].length > 0
+      args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
       Bozo.execute_command :fx_cop, args
     end
