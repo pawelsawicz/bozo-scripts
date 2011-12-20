@@ -23,8 +23,8 @@ module Bozo::Hooks
       return unless Teamcity.hosted_in_teamcity?
 
       # only supporting nunit at present
-      report_path = File.expand_path(File.join(Dir.pwd, "/temp/nunit/#{t}-report.xml"))
-      puts "##teamcity[importData type='#{t}' path='#{report_path}']" if File.exist? report_path
+      report_path = File.expand_path(File.join(Dir.pwd, "/temp/nunit/nunit-report.xml"))
+      puts "##teamcity[importData type='nunit' path='#{report_path}']" if File.exist? report_path
 
       log_post_step :test
     end
