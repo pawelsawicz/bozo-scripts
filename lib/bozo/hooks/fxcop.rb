@@ -1,5 +1,10 @@
 module Bozo::Hooks
 
+  # == FxCop
+  # Specifies a hook for running FxCop
+  #
+  # The default configuration runs against the compiled assemblies produced via msbuild
+  # Alternatively a specific .fxcop project file can be specified in the configuration
   class FxCop
 
     @@defaults = {
@@ -7,10 +12,6 @@ module Bozo::Hooks
       :framework_versions => [:net35, :net40],
       :project => nil
     }
-
-    def config_with_defaults
-      @@defaults.merge @config
-    end
 
     def initialize
       @config = {}
@@ -29,16 +30,6 @@ module Bozo::Hooks
       File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
     end
 
-    def configuration
-      config_with_defaults
-    end
-
-    def output_path
-      out_path = File.expand_path File.join('temp', 'fxcop')
-      FileUtils.mkdir_p out_path
-      out_path
-    end
-
     def post_compile
       config = configuration
 
@@ -49,6 +40,23 @@ module Bozo::Hooks
       end
     end
 
+    private
+
+    def configuration
+      config_with_defaults
+    end
+
+    def config_with_defaults
+      @@defaults.merge @config
+    end
+
+    def output_path
+      out_path = File.expand_path File.join('temp', 'fxcop')
+      FileUtils.mkdir_p out_path
+      out_path
+    end
+
+    # Executes fxcop against the msbuild built assemblies
     def execute_projects(config)
       config[:framework_versions].each do |framework_version|
         args = []
@@ -69,6 +77,7 @@ module Bozo::Hooks
       end
     end
 
+    # Executes a .fxcop file
     def execute_fxcop_project(config)
       args = []
       args << '"' + path + '"'
