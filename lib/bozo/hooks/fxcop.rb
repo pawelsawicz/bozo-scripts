@@ -1,6 +1,5 @@
 module Bozo::Hooks
 
-  # == FxCop
   # Specifies a hook for running FxCop
   #
   # The default configuration runs against the compiled assemblies produced via msbuild
@@ -18,20 +17,23 @@ module Bozo::Hooks
       @config = {}
     end
 
+    # Adds a type to analyze
     def type(type)
       @config[:types] ||= []
       @config[:types] << type
     end
 
+    # Specifies an fxcop project file
     def project(project)
       @config[:project] = project
     end
 
-    def path(path = nil)
-      @config[:path] = path unless path.nil?
-      @config[:path]
+    # Specifies the fxcop path
+    def path(path)
+      @config[:path] = path
     end
 
+    # Runs the post_compile hook
     def post_compile
       config = configuration
 
@@ -52,6 +54,7 @@ module Bozo::Hooks
       @@defaults.merge @config
     end
 
+    # The path to output the fxcop results to
     def output_path
       out_path = File.expand_path File.join('temp', 'fxcop')
       FileUtils.mkdir_p out_path
@@ -59,10 +62,13 @@ module Bozo::Hooks
     end
 
     # Executes fxcop against the msbuild built assemblies
+    #
+    # @param [Hash] config
+    #     The fxcop configuration
     def execute_projects(config)
       config[:framework_versions].each do |framework_version|
         args = []
-        args << '"' + path + '"'
+        args << '"' + config[:path] + '"'
         args << "/out:#{output_path}\\FxCop-#{framework_version}-Results.xml"
         args << "/types:" + config[:types].join(',') if config[:types].length > 0
 
@@ -80,9 +86,12 @@ module Bozo::Hooks
     end
 
     # Executes a .fxcop file
+    #
+    # @param [Hash] config
+    #     The fxcop configuration
     def execute_fxcop_project(config)
       args = []
-      args << '"' + path + '"'
+      args << '"' + config[:path] + '"'
       args << "/out:\"#{output_path}\\FxCop-#{File.basename(config[:project], '.*')}-Results.xml\""
       args << "/project:\"#{config[:project]}\""
       args << "/types:" + config[:types].join(',') if config[:types].length > 0
@@ -90,12 +99,19 @@ module Bozo::Hooks
       Bozo.execute_command :fx_cop, args
     end
 
+    # List of compiled assemblies and executables
+
+    # @param [String] project_path
+    #     The path of the project
+    # @param [Symbol] framework_version
+    #     The framework_version to find assemblies for
     def project_files(project_path, framework_version)
       project_name = File.basename(project_path)
       file_matcher = File.expand_path File.join(project_path, framework_version.to_s, "#{project_name}.{dll,exe}")
       Dir[file_matcher]
     end
 
+    # List of all the msbuild built projects
     def project_dirs
       project_file_matcher = File.expand_path File.join('temp', 'msbuild', '*')
       Dir[project_file_matcher]
