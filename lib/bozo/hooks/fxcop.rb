@@ -17,7 +17,7 @@ module Bozo::Hooks
     end
 
     def type(type)
-      @config[:types] = [] if @config[:types] == nil
+      @config[:types] ||= []
       @config[:types] << type
     end
 
@@ -42,7 +42,7 @@ module Bozo::Hooks
     def post_compile
       config = configuration
 
-      if config[:project] == nil
+      if config[:project].nil?
         execute_projects config
       else
         execute_fxcop_project config
@@ -60,8 +60,6 @@ module Bozo::Hooks
           projects = project_files(project, framework_version)
 
           projects.each do |project_file|
-            puts project_file
-
             project_path = File.expand_path(project_file).gsub(/\//, '\\')
             args << "/file:\"#{project_path}\""
           end
@@ -87,13 +85,9 @@ module Bozo::Hooks
       Dir[file_matcher]
     end
 
-    def project_dirs()
+    def project_dirs
       project_file_matcher = File.expand_path File.join('temp', 'msbuild', '*')
       Dir[project_file_matcher]
-    end
-
-    def required_tools
-      :fx_cop
     end
 
   end
