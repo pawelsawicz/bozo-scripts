@@ -1,9 +1,12 @@
 module Bozo::Hooks
 
-  # Specifies a hook for running FxCop
+  # Specifies a hook for running FxCop.
   #
-  # The default configuration runs against the compiled assemblies produced via msbuild
-  # Alternatively a specific .fxcop project file can be specified in the configuration
+  # The default configuration runs against the compiled assemblies produced via
+  # msbuild.
+  #
+  # Alternatively a specific .fxcop project file can be specified in the 
+  # configuration.
   class FxCop
 
     @@defaults = {
