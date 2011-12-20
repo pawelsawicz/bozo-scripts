@@ -10,7 +10,8 @@ module Bozo::Hooks
     @@defaults = {
       :types => [],
       :framework_versions => [:net35, :net40],
-      :project => nil
+      :project => nil,
+      :path => File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
     }
 
     def initialize
@@ -26,8 +27,9 @@ module Bozo::Hooks
       @config[:project] = project
     end
 
-    def path
-      File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
+    def path(path = nil)
+      @config[:path] = path unless path.nil?
+      @config[:path]
     end
 
     def post_compile
