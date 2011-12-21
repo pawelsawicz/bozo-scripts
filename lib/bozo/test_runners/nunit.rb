@@ -17,39 +17,54 @@ module Bozo::TestRunners
     def report_path(path)
       @report_path = path
     end
+
+    def coverage(coverage)
+      @coverage = coverage
+    end
     
     def to_s
       "Run tests with nunit against projects #{@projects}"
     end
-    
-    def execute
-      args = []
-      
+
+    def runner_path
       nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', 'nunit-console.exe')
-      
       log_and_die 'No NUnit runners found. You must install one via nuget.' if nunit_runners.empty?
       log_and_die 'Multiple NUnit runners found. There should only be one.' if nunit_runners.size > 1
-      
+
       nunit_runner = nunit_runners.first
-      
+
       Bozo.log_debug "Found runner at #{nunit_runner}"
-      
-      args << nunit_runner
+
+      nunit_runner
+    end
+
+    def runner_args
+      args = []
+
       @projects.each do |project|
         expand_and_glob('temp', 'msbuild', project, '**', "#{project}.dll").each do |test_dll|
           args << "\"#{test_dll}\""
         end
       end
       args << '/nologo'
-            
+
       report_path = @report_path
       report_path = expand_path('temp', 'nunit', 'nunit-report.xml') unless report_path
-      
+
       # Ensure the directory is there because NUnit won't make it
       FileUtils.mkdir_p File.dirname(report_path)
-      
+
       args << "/xml:\"#{report_path}\""
+
+      args
+    end
+    
+    def execute
+      args = []
       
+      args << runner_path
+      args |= runner_args
+
       Bozo.execute_command :nunit, args
     end
     
