@@ -49,7 +49,7 @@ module Bozo::TestRunners
       args << '/nologo'
 
       report_path = @report_path
-      report_path = expand_path('temp', 'nunit', 'nunit-report.xml') unless report_path
+      report_path = expand_path('temp', 'nunit', "#{Time.now.to_i}-nunit-report.xml") unless report_path
 
       # Ensure the directory is there because NUnit won't make it
       FileUtils.mkdir_p File.dirname(report_path)

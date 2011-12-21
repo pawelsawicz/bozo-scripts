@@ -45,7 +45,7 @@ module Bozo::TestRunners
     private
 
     def generate_coverage_file(runner)
-      output_file = File.expand_path(File.join('temp', 'dotcover', "dotcover-#{Time.now.to_i}-report.xml"))
+      output_file = File.expand_path(File.join('temp', 'dotcover', "#{Time.now.to_i}-dotcover-report.xml"))
 
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.AnalyseParams do

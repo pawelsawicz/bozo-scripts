@@ -72,7 +72,7 @@ module Bozo::Hooks
       config[:framework_versions].each do |framework_version|
         args = []
         args << '"' + config[:path] + '"'
-        args << "/out:#{output_path}\\FxCop-#{framework_version}-Results.xml"
+        args << "/out:#{output_path}\\#{Time.now.to_i}-#{framework_version}-FxCop-report.xml"
         args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
         project_dirs.each do |project|
@@ -95,7 +95,7 @@ module Bozo::Hooks
     def execute_fxcop_project(config)
       args = []
       args << '"' + config[:path] + '"'
-      args << "/out:\"#{output_path}\\FxCop-#{File.basename(config[:project], '.*')}-Results.xml\""
+      args << "/out:\"#{output_path}\\#{File.basename(config[:project], '.*')}-FxCop-report.xml\""
       args << "/project:\"#{config[:project]}\""
       args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
