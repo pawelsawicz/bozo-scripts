@@ -2,8 +2,13 @@ require 'nokogiri'
 
 module Bozo::TestRunners
 
+  # Adds a code coverage test runner using dotCover
+  #
+  # The default configuration looks for dotCover in the ProgramFiles(x86) path
+  #
+  # Test runners can be defined for dotCover to run against. Each runner
+  # produces a separate dotcover output
   class DotCover
-
     @@defaults = {
       :path => File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
     }
@@ -13,17 +18,20 @@ module Bozo::TestRunners
       @runners = []
     end
 
+    # Adds a test runner
+    #
+    # @param [Symbol] runner
+    #     The test runner to wrap with dotcover
     def runner(runner, &block)
       Bozo::Configuration.add_instance @runners, Bozo::TestRunners, runner, block
     end
 
     def execute
       config = configuration
+      dotcover_path = config[:path]
       
       @runners.each do |runner|
         coverage_path = generate_coverage_file runner
-
-        dotcover_path = config[:path]
 
         args = []
         args << '"' + dotcover_path + '"'
@@ -37,12 +45,14 @@ module Bozo::TestRunners
     private
 
     def generate_coverage_file(runner)
+      output_file = File.expand_path(File.join('temp', 'dotcover', "dotcover-#{Time.now.to_i}-report.xml"))
+
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.AnalyseParams do
           doc.Executable runner.runner_path.gsub(/\//, '\\')
           doc.Arguments runner.runner_args.join(' ')
           doc.WorkingDir File.expand_path(File.join('temp', 'dotcover'))
-          doc.Output File.expand_path(File.join('temp', 'dotcover', 'dotcover-report.xml'))
+          doc.Output output_file
         end
       end
 
