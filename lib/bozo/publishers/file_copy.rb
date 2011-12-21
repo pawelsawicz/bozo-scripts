@@ -60,7 +60,9 @@ module Bozo::Publishers
       raise Bozo::ConfigurationError.new "Target files already exist - #{existing_files}" unless existing_files.empty?
     end
 
-    def copy_pairs
+    # Returns the source-destination file pairs specified by the source
+    # directories and destination directory.
+    def copy_pairs # :yields: source_path, destination_path
       destination = File.join @destination
 
       @directories.each do |dir|
