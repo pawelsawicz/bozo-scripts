@@ -1,6 +1,6 @@
 require 'nokogiri'
 
-module Bozo::Publishers
+module Bozo::Packagers
 
   class Nuget
     
