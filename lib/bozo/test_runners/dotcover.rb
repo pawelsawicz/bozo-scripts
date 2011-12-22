@@ -19,7 +19,8 @@ module Bozo::TestRunners
 
     def initialize
       @@defaults = {
-        :path => DotCover.default_path
+        :path => DotCover.default_path,
+        :required => true
       }
 
       @config = {}
@@ -46,12 +47,12 @@ module Bozo::TestRunners
     end
 
     def required?(required)
-      @required = required
+      @config[:required] = required
     end
 
     def execute
       @runners.each do |runner|
-        execute_with_coverage(runner) if (@required || dotcover_installed?)
+        execute_with_coverage(runner) if (configuration[:required] || dotcover_installed?)
 
         execute_without_coverage(runner) unless required?
       end
