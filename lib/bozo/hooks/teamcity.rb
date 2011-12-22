@@ -64,7 +64,7 @@ module Bozo::Hooks
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
 
         reports.each do |report|
-          puts "##teamcity[importData type='dotNetCoverage' tool='#{type}' path='#{report}']"
+          puts "##teamcity[importData type='dotNetCoverage' tool='#{to_class_name(type)}' path='#{report}']"
         end
       end
     end
@@ -80,11 +80,6 @@ module Bozo::Hooks
     def report_files(path, type)
       files = File.expand_path(File.join(path, "/**/*-#{to_class_name(type)}-report.xml"))
       Dir[files]
-    end
-
-    def map_type_to_teamcity_report(type)
-      "dotcover" if type
-      if type
     end
 
     # Converts a symbol into a Pascal Case class name.
