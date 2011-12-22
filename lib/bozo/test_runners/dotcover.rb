@@ -10,7 +10,7 @@ module Bozo::TestRunners
   # produces a separate dotcover output
   class DotCover
     @@defaults = {
-      :path => DotCover.default_path
+      :path => default_path
     }
 
     def initialize
