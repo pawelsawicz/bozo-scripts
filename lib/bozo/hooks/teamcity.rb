@@ -22,15 +22,8 @@ module Bozo::Hooks
     def post_test
       return unless Teamcity.hosted_in_teamcity?
 
-      report_types = [:nunit, :dot_cover]
-
-      report_types.each do |type|
-        reports = report_files(File.join(Dir.pwd, "/temp"), type)
-
-        reports.each do |report|
-          puts "##teamcity[importData type='#{type}' path='#{report}']"
-        end
-      end
+      report
+      report_dotnetcoverage
 
       log_post_step :test
     end
@@ -53,6 +46,29 @@ module Bozo::Hooks
 
     private
 
+    def report
+      report_types = [:nunit, :fx_cop]
+      report_types.each do |type|
+        reports = report_files(File.join(Dir.pwd, "/temp"), type)
+
+        reports.each do |report|
+          puts "##teamcity[importData type='#{type}' path='#{report}']"
+        end
+      end
+    end
+
+    def report_dotnetcoverage
+      tool_types = [:dot_cover]
+      
+      tool_types.each do |type|
+        reports = report_files(File.join(Dir.pwd, "/temp"), type)
+
+        reports.each do |report|
+          puts "##teamcity[importData type='dotNetCoverage' tool='#{type}' path='#{report}']"
+        end
+      end
+    end
+
     def log_pre_step(step)
       puts "##teamcity[progressStart 'Pre #{step}']" if Teamcity.hosted_in_teamcity?
     end
@@ -64,6 +80,11 @@ module Bozo::Hooks
     def report_files(path, type)
       files = File.expand_path(File.join(path, "/**/*-#{to_class_name(type)}-report.xml"))
       Dir[files]
+    end
+
+    def map_type_to_teamcity_report(type)
+      "dotcover" if type
+      if type
     end
 
     # Converts a symbol into a Pascal Case class name.
