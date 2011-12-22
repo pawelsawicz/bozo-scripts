@@ -22,9 +22,15 @@ module Bozo::Hooks
     def post_test
       return unless Teamcity.hosted_in_teamcity?
 
-      # only supporting nunit at present
-      report_path = File.expand_path(File.join(Dir.pwd, "/temp/nunit/nunit-report.xml"))
-      puts "##teamcity[importData type='nunit' path='#{report_path}']" if File.exist? report_path
+      report_types = [:nunit]
+
+      report_types.each do |type|
+        reports = report_files(File.join(Dir.pwd, "/temp"), type)
+
+        reports.each do |report|
+          puts "##teamcity[importData type='#{type}' path='#{report}']"
+        end
+      end
 
       log_post_step :test
     end
@@ -41,6 +47,12 @@ module Bozo::Hooks
       method.to_s =~ /^(pre|post)_(.+)/ or super
     end
 
+    def self.hosted_in_teamcity?
+      ENV['TEAMCITY_VERSION'] != nil
+    end
+
+    private
+
     def log_pre_step(step)
       puts "##teamcity[progressStart 'Pre #{step}']" if Teamcity.hosted_in_teamcity?
     end
@@ -49,8 +61,9 @@ module Bozo::Hooks
       puts "##teamcity[progressEnd 'Post #{step}']" if Teamcity.hosted_in_teamcity?
     end
 
-    def self.hosted_in_teamcity?
-      ENV['TEAMCITY_VERSION'] != nil
+    def report_files(path, type)
+      files = File.expand_path(File.join(path, "/**/*-#{type}-report.xml"))
+      Dir[files]
     end
 
   end
