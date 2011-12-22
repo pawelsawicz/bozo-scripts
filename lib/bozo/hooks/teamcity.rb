@@ -22,7 +22,7 @@ module Bozo::Hooks
     def post_test
       return unless Teamcity.hosted_in_teamcity?
 
-      report_types = [:nunit]
+      report_types = [:nunit, :dot_cover]
 
       report_types.each do |type|
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
@@ -62,7 +62,7 @@ module Bozo::Hooks
     end
 
     def report_files(path, type)
-      files = File.expand_path(File.join(path, "/**/*-#{type}-report.xml"))
+      files = File.expand_path(File.join(path, "/**/*-#{Bozo::Configuration.to_class_name(type)}-report.xml"))
       Dir[files]
     end
 
