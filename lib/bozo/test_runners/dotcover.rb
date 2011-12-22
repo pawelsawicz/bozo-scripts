@@ -1,5 +1,4 @@
 require 'nokogiri'
-require 'bozo/hooks/teamcity'
 
 module Bozo::TestRunners
 
@@ -11,7 +10,7 @@ module Bozo::TestRunners
   # produces a separate dotcover output
   class DotCover
     def self.default_path
-      File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe') if Bozo::Hooks::TeamCity.hosted_in_teamcity?
+      File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe') if ENV['TEAMCITY_VERSION'] != nil
 
       File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
     end
