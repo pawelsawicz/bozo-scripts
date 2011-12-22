@@ -27,7 +27,9 @@ module Bozo::TestRunners
     end
 
     def dotcover_installed?
-      File.exist?(configuration[:path])
+      path = configuration[:path]
+      Bozo.log_debug "checking whether dotcover is installed at #{path}"
+      File.exist?(path)
     end
 
     # Adds a test runner
