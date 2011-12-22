@@ -38,23 +38,36 @@ module Bozo::TestRunners
       Bozo::Configuration.add_instance @runners, Bozo::TestRunners, runner, block
     end
 
+    def required?(required)
+      @required = required
+    end
+
     def execute
-      config = configuration
-      dotcover_path = config[:path]
-      
       @runners.each do |runner|
-        coverage_path = generate_coverage_file runner
+        execute_with_coverage runner if @required || dotcover_installed?
 
-        args = []
-        args << '"' + dotcover_path + '"'
-        args << "analyse #{coverage_path}"
-
-        Bozo.log_debug 'Running dotcover from "' + dotcover_path + '"'
-        Bozo.execute_command :dot_cover, args
+        execute_without_coverage runner unless required?
       end
     end
 
     private
+
+    def execute_without_coverage(runner)
+      runner.execute
+    end
+
+    def execute_with_coverage(runner)
+      config = configuration
+      dotcover_path = config[:path]
+      coverage_path = generate_coverage_file runner
+
+      args = []
+      args << '"' + dotcover_path + '"'
+      args << "analyse #{coverage_path}"
+
+      Bozo.log_debug 'Running dotcover from "' + dotcover_path + '"'
+      Bozo.execute_command :dot_cover, args
+    end
 
     def generate_coverage_file(runner)
       output_file = File.expand_path(File.join('temp', 'dotcover', "#{Time.now.to_i}-dotcover-report.xml"))
