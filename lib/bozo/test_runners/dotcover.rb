@@ -26,6 +26,10 @@ module Bozo::TestRunners
       @runners = []
     end
 
+    def self.dotcover_installed?
+      File.exist?(default_path)
+    end
+
     # Adds a test runner
     #
     # @param [Symbol] runner
