@@ -61,12 +61,12 @@ module Bozo::TestRunners
     private
 
     def execute_without_coverage(runner)
-      Bozo.log_debug 'Running ' + runner + ' without coverage'
+      Bozo.log_debug 'Running ' + runner.class.to_s + ' without coverage'
       runner.execute
     end
 
     def execute_with_coverage(runner)
-      Bozo.log_debug 'Running ' + runner + ' with coverage'
+      Bozo.log_debug 'Running ' + runner.class.to_s + ' with coverage'
 
       config = configuration
       dotcover_path = config[:path]
