@@ -53,10 +53,13 @@ module Bozo::TestRunners
     private
 
     def execute_without_coverage(runner)
+      Bozo.log_debug 'Running ' + runner + ' without coverage'
       runner.execute
     end
 
     def execute_with_coverage(runner)
+      Bozo.log_debug 'Running ' + runner + ' with coverage'
+
       config = configuration
       dotcover_path = config[:path]
       coverage_path = generate_coverage_file runner
