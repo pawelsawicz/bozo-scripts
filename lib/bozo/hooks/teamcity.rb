@@ -52,7 +52,8 @@ module Bozo::Hooks
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
 
         reports.each do |report|
-          puts "##teamcity[importData type='#{type}' path='#{report}']"
+          type_name = Bozo::Configuration.to_class_name(type).downcase
+          puts "##teamcity[importData type='#{type_name}' path='#{report}']"
         end
       end
     end
@@ -64,7 +65,8 @@ module Bozo::Hooks
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
 
         reports.each do |report|
-          puts "##teamcity[importData type='dotNetCoverage' tool='#{to_class_name(type).downcase}' path='#{report}']"
+          tool_name = Bozo::Configuration.to_class_name(type).downcase
+          puts "##teamcity[importData type='dotNetCoverage' tool='#{tool_name}' path='#{report}']"
         end
       end
     end
@@ -78,18 +80,8 @@ module Bozo::Hooks
     end
 
     def report_files(path, type)
-      files = File.expand_path(File.join(path, "/**/*-#{to_class_name(type)}-report.xml"))
+      files = File.expand_path(File.join(path, "/**/*-#{Bozo::Configuration.to_class_name(type)}-report.xml"))
       Dir[files]
-    end
-
-    # Converts a symbol into a Pascal Case class name.
-    #
-    # eg. `:single` => `"Single"`, `:two_words` => `"TwoWords"`.
-    #
-    # @param [Symbol] type
-    #     The name of a step executor.
-    def to_class_name(type)
-      type.to_s.split('_').map{|word| word.capitalize}.join
     end
 
   end
