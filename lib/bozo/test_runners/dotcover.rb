@@ -19,7 +19,7 @@ module Bozo::TestRunners
     end
 
     def self.default_path
-      ENV['teamcity.dotCover.home'] if Bozo::TeamCity.hosted_in_teamcity?
+      ENV['teamcity.dotCover.home'] if Bozo::Hooks::TeamCity.hosted_in_teamcity?
 
       File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
     end
