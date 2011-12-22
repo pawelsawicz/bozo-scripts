@@ -9,6 +9,12 @@ module Bozo::TestRunners
   # Test runners can be defined for dotCover to run against. Each runner
   # produces a separate dotcover output
   class DotCover
+    def self.default_path
+      File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe') if Bozo::Hooks::TeamCity.hosted_in_teamcity?
+
+      File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
+    end
+
     @@defaults = {
       :path => DotCover.default_path
     }
@@ -40,12 +46,6 @@ module Bozo::TestRunners
         Bozo.log_debug 'Running dotcover from "' + dotcover_path + '"'
         Bozo.execute_command :dot_cover, args
       end
-    end
-
-    def self.default_path
-      File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe') if Bozo::Hooks::TeamCity.hosted_in_teamcity?
-
-      File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
     end
 
     private
