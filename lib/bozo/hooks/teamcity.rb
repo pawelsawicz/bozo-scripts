@@ -40,12 +40,14 @@ module Bozo::Hooks
       method.to_s =~ /^(pre|post)_(.+)/ or super
     end
 
+    # Returns whether teamcity is hosting bozo
     def self.hosted_in_teamcity?
       ENV['TEAMCITY_VERSION'] != nil
     end
 
     private
 
+    # Notifies teamcity of general reports such as test runner results
     def report
       report_types = [:nunit, :fxcop]
       report_types.each do |type|
@@ -57,6 +59,7 @@ module Bozo::Hooks
       end
     end
 
+    # Notifies teamcity of dotNetCoverage results
     def report_dotnetcoverage
       tool_types = [:dot_cover]
       
