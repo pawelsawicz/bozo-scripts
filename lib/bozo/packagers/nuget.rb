@@ -27,6 +27,8 @@ module Bozo::Packagers
     def execute
       @projects.each {|project| package_project(project)}
     end
+
+    private
     
     def package_project(project)
       spec_path = generate_specification(project)
@@ -39,7 +41,7 @@ module Bozo::Packagers
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
           doc.metadata do
             doc.id project
-            doc.version_ "#{Bozo::Configuration.version}-pre#{Bozo::ENV['GIT_HASH']}" # Need to know if a 'proper' build and then not add hash
+            doc.version_ package_version
             doc.authors 'Zopa'
             doc.description project
             doc.projectUrl 'http://www.zopa.com'
@@ -55,6 +57,17 @@ module Bozo::Packagers
       FileUtils.mkdir_p File.dirname(spec_path)
       File.open(spec_path, 'w+') {|f| f.write(builder.to_xml)}
       spec_path
+    end
+
+    # Returns the version that the package should be given.
+    def package_version
+      # If running on a build server then it is a real release, otherwise it is
+      # a preview release and the version should reflect that.
+      if Bozo::Configuration.build_server
+        Bozo::Configuration.version
+      else
+        "#{Bozo::Configuration.version}-pre#{Bozo::ENV['GIT_HASH']}"
+      end
     end
     
     def create_package(project, spec_path)
