@@ -47,13 +47,12 @@ module Bozo::Hooks
     private
 
     def report
-      report_types = [:nunit, :fx_cop]
+      report_types = [:nunit, :fxcop]
       report_types.each do |type|
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
 
         reports.each do |report|
-          type_name = Bozo::Configuration.to_class_name(type).downcase
-          puts "##teamcity[importData type='#{type_name}' path='#{report}']"
+          puts "##teamcity[importData type='#{type}' path='#{report}']"
         end
       end
     end
