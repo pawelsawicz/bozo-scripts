@@ -62,8 +62,18 @@ module Bozo::Hooks
     end
 
     def report_files(path, type)
-      files = File.expand_path(File.join(path, "/**/*-#{Bozo::Configuration.to_class_name(type)}-report.xml"))
+      files = File.expand_path(File.join(path, "/**/*-#{to_class_name(type)}-report.xml"))
       Dir[files]
+    end
+
+    # Converts a symbol into a Pascal Case class name.
+    #
+    # eg. `:single` => `"Single"`, `:two_words` => `"TwoWords"`.
+    #
+    # @param [Symbol] type
+    #     The name of a step executor.
+    def to_class_name(type)
+      type.to_s.split('_').map{|word| word.capitalize}.join
     end
 
   end
