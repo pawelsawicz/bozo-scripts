@@ -9,21 +9,21 @@ module Bozo::TestRunners
   # Test runners can be defined for dotCover to run against. Each runner
   # produces a separate dotcover output
   class DotCover
-    def initialize
-      @defaults = {
-        :path => DotCover.default_path
-      }
-
-      @config = {}
-      @runners = []
-    end
-
     def self.default_path
       if ENV['TEAMCITY_VERSION'].nil?
         File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
       else
         File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe')
       end
+    end
+
+    def initialize
+      @@defaults = {
+        :path => DotCover.default_path
+      }
+
+      @config = {}
+      @runners = []
     end
 
     # Adds a test runner
@@ -76,7 +76,7 @@ module Bozo::TestRunners
     end
 
     def config_with_defaults
-      @defaults.merge @config
+      @@defaults.merge @config
     end
 
   end
