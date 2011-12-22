@@ -64,7 +64,7 @@ module Bozo::Hooks
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
 
         reports.each do |report|
-          puts "##teamcity[importData type='dotNetCoverage' tool='#{to_class_name(type)}' path='#{report}']"
+          puts "##teamcity[importData type='dotNetCoverage' tool='#{to_class_name(type).downcase}' path='#{report}']"
         end
       end
     end
