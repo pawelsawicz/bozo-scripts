@@ -10,9 +10,11 @@ module Bozo::TestRunners
   # produces a separate dotcover output
   class DotCover
     def self.default_path
-      return File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe') if ENV['TEAMCITY_VERSION'] != nil
-
-      File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
+      if ENV['TEAMCITY_VERSION'] != nil
+        File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe')
+      else
+        File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
+      end
     end
 
     @@defaults = {
