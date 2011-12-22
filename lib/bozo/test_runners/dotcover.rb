@@ -52,7 +52,10 @@ module Bozo::TestRunners
 
     def execute
       @runners.each do |runner|
-        execute_with_coverage(runner) if (configuration[:required] || dotcover_installed?)
+        if (configuration[:required] || dotcover_installed?)
+          puts "afaf"
+          execute_with_coverage(runner)
+        end
 
         execute_without_coverage(runner) unless required?
       end
