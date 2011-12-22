@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'bozo/hooks/teamcity'
 
 module Bozo::TestRunners
 
