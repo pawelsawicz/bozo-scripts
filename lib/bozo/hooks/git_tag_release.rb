@@ -15,7 +15,7 @@ module Bozo::Hooks
       end
 
       Bozo.execute_command :git, ['git', 'tag', tag_name]
-      # Bozo.execute_command :git, ['git', 'push', '--tags']
+      Bozo.execute_command :git, ['git', 'push', '--tags']
     end
 
   end
