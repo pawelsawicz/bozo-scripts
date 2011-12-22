@@ -42,6 +42,12 @@ module Bozo::TestRunners
       end
     end
 
+    def self.default_path
+      File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe') if Bozo::Hooks::TeamCity.hosted_in_teamcity?
+
+      File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
+    end
+
     private
 
     def generate_coverage_file(runner)
@@ -69,12 +75,6 @@ module Bozo::TestRunners
 
     def config_with_defaults
       @@defaults.merge @config
-    end
-
-    def self.default_path
-      ENV['teamcity.dotCover.home'] if Bozo::Hooks::TeamCity.hosted_in_teamcity?
-
-      File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
     end
 
   end
