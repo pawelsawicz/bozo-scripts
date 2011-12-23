@@ -9,14 +9,24 @@ module Bozo::Hooks
   # configuration.
   class FxCop
 
-    @@defaults = {
-      :types => [],
-      :framework_versions => [:net35, :net40],
-      :project => nil,
-      :path => File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
-    }
+    def self.default_path
+      if ENV['ProgramFiles(x86)'].nil?
+        program_files_path = ENV['ProgramFiles']
+      else
+        program_files_path = ENV['ProgramFiles(x86)']
+      end
+
+      File.join(program_files_path, 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
+    end
 
     def initialize
+      @@defaults = {
+        :types => [],
+        :framework_versions => [:net35, :net40],
+        :project => nil,
+        :path => default_path
+      }
+
       @config = {}
     end
 
