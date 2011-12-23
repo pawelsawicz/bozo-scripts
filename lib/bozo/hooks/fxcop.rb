@@ -24,7 +24,7 @@ module Bozo::Hooks
         :types => [],
         :framework_versions => [:net35, :net40],
         :project => nil,
-        :path => default_path
+        :path => FxCop.default_path
       }
 
       @config = {}
