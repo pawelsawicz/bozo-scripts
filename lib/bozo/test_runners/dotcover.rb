@@ -36,6 +36,7 @@ module Bozo::TestRunners
       @runners = []
     end
 
+    # Returns whether dotcover is installed at the configured path
     def dotcover_installed?
       path = configuration[:path]
 
@@ -47,11 +48,19 @@ module Bozo::TestRunners
     # Adds a test runner
     #
     # @param [Symbol] runner
-    #     The test runner to wrap with dotcover
+    #     A test runner to wrap with dotcover
     def runner(runner, &block)
       Bozo::Configuration.add_instance @runners, Bozo::TestRunners, runner, block
     end
 
+    # Specifies whether covering with dotcover is required
+    #
+    # If it is not required, and dotcover cannot be found, then test runners
+    # are executed without coverage. If dotcover is required but cannot be
+    # found then an error will occur.
+    #
+    # @param [boolean] required
+    #     Whether dotCover coverage is required
     def required?(required)
       @config[:required] = required
     end
