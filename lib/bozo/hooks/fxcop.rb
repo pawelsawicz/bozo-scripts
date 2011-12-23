@@ -16,7 +16,7 @@ module Bozo::Hooks
         program_files_path = ENV['ProgramFiles(x86)']
       end
 
-      File.join(program_files_path, 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
+      File.join(program_files_path, 'Microsoft Fxcop 10.0', 'fxcopcmd.exe') unless program_files_path.nil?
     end
 
     def initialize
