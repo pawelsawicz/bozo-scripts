@@ -8,7 +8,8 @@ module Bozo::Compilers
       :version => 'v4.0.30319',
       :framework => 'Framework64',
       :properties => {:configuration => :release},
-      :targets => [:clean, :build]
+      :targets => [:clean, :build],
+      :max_cores => nil
     }
     
     def config_with_defaults
@@ -34,6 +35,14 @@ module Bozo::Compilers
     def property(args)
       @config[:properties] ||= {}
       @config[:properties] = @config[:properties].merge(args)          
+    end
+
+    # Assign how many cores should be used by msbuild
+    #
+    # @param [Integer] cores
+    #     The maximum number of cores to allow msbuild to use
+    def max_cores(cores)
+      @config[:max_cores] = cores
     end
     
     alias :properties :property
@@ -81,6 +90,8 @@ module Bozo::Compilers
         args << '/nologo'
         args << '/verbosity:normal'
         args << "/target:#{config[:targets].map{|t| t.to_s}.join(';')}"
+        args << "/m" if config[:max_cores].nil? # let msbuild decide how many cores to use
+        args << "/m:" + config[:max_cores] unless config[:max_cores].nil? # specifying the number of cores
         
         config[:properties].each do |key, value|
           args << "/property:#{key}=\"#{value}\""
