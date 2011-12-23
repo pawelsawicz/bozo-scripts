@@ -81,6 +81,8 @@ module Bozo::Hooks
     def execute_projects(config)
       Bozo.log_debug "Executing projects with '#{config[:path]}'" if config[:framework_versions].any?
 
+      Bozo.log_fatal "No path specified for fxcop" if config[:path].nil?
+
       config[:framework_versions].each do |framework_version|
         args = []
         args << '"' + config[:path] + '"'
@@ -106,6 +108,8 @@ module Bozo::Hooks
     #     The fxcop configuration
     def execute_fxcop_project(config)
       Bozo.log_debug "Executing fxcop project '#{config[:project]}' with '#{config[:path]}'"
+
+      Bozo.log_fatal "No path specified for fxcop" if config[:path].nil?
 
       args = []
       args << '"' + config[:path] + '"'
