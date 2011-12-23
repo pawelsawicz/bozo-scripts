@@ -70,7 +70,7 @@ module Bozo::TestRunners
 
     def execute_with_coverage(runner)
       if configuration[:required] & !dotcover_installed?
-        return Bozo.log_fatal 'Attempting to run with coverage but dotcover could not be found'
+        Bozo.log_fatal "Attempting to run with coverage but dotcover could not be found at #{configuration[:path]}"
       end
 
       Bozo.log_debug 'Running ' + runner.class.to_s + ' with coverage'
