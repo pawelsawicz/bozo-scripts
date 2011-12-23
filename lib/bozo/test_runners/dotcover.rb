@@ -12,7 +12,7 @@ module Bozo::TestRunners
     def self.default_path
       if ENV['TEAMCITY_VERSION'].nil?
         File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
-      else
+      else unless ENV['teamcity.dotCover.home'].nil?
         File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe')
       end
     end
