@@ -79,6 +79,8 @@ module Bozo::Hooks
     # @param [Hash] config
     #     The fxcop configuration
     def execute_projects(config)
+      Bozo.log_debug "Executing projects with '#{config[:path]}'" if config[:framework_versions].any?
+
       config[:framework_versions].each do |framework_version|
         args = []
         args << '"' + config[:path] + '"'
@@ -103,6 +105,8 @@ module Bozo::Hooks
     # @param [Hash] config
     #     The fxcop configuration
     def execute_fxcop_project(config)
+      Bozo.log_debug "Executing fxcop project '#{config[:project]}' with '#{config[:path]}'"
+
       args = []
       args << '"' + config[:path] + '"'
       args << "/out:\"#{output_path}\\FxCop-#{File.basename(config[:project], '.*')}-Results.xml\""
