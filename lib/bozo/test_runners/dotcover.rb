@@ -34,13 +34,7 @@ module Bozo::TestRunners
 
       return false if path.nil?
 
-      Bozo.log_debug "checking whether dotcover is installed at #{path}"
-      exists = File.exist? path
-
-      Bozo.log_debug "Dotcover is installed" if exists
-      Bozo.log_debug "Dotcover is not installed" unless exists
-
-      exists
+      File.exist? path
     end
 
     # Adds a test runner
