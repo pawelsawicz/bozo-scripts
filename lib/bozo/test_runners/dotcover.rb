@@ -12,7 +12,14 @@ module Bozo::TestRunners
     def self.default_path
       if ENV['teamcity.dotCover.home'].nil?
         Bozo.log_debug 'Using dotcover from default installation directory'
-        File.join(ENV['ProgramFiles(x86)'], 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
+
+        if ENV['ProgramFiles(x86)'].nil?
+          program_files_path = ENV['ProgramFiles']
+        else
+          program_files_path = ENV['ProgramFiles(x86)']
+        end
+
+        File.join(program_files_path, 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
       else
         Bozo.log_debug 'Using dotcover from teamcity.dotCover.home environment variable'
         File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe')
