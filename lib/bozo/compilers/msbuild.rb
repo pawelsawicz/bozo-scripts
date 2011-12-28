@@ -90,8 +90,8 @@ module Bozo::Compilers
         args << '/nologo'
         args << '/verbosity:normal'
         args << "/target:#{config[:targets].map{|t| t.to_s}.join(';')}"
-        args << "/m" if config[:max_cores].nil? # let msbuild decide how many cores to use
-        args << "/m:" + config[:max_cores] unless config[:max_cores].nil? # specifying the number of cores
+        args << "/maxcpucount" if config[:max_cores].nil? # let msbuild decide how many cores to use
+        args << "/maxcpucount:#{config[:max_cores]}" unless config[:max_cores].nil? # specifying the number of cores
         
         config[:properties].each do |key, value|
           args << "/property:#{key}=\"#{value}\""
