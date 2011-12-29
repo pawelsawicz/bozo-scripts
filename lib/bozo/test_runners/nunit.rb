@@ -32,7 +32,7 @@ module Bozo::TestRunners
       
       nunit_runner = nunit_runners.first
       
-      Bozo.log_debug "Found runner at #{nunit_runner}"
+      log_debug "Found runner at #{nunit_runner}"
       
       args << nunit_runner
       @projects.each do |project|
@@ -50,7 +50,7 @@ module Bozo::TestRunners
       
       args << "/xml:\"#{report_path}\""
       
-      Bozo.execute_command :nunit, args
+      execute_command :nunit, args
     end
     
     def expand_path(*args)
@@ -62,7 +62,7 @@ module Bozo::TestRunners
     end
     
     def log_and_die(msg)
-      Bozo.log_fatal msg
+      log_fatal msg
       raise msg
     end
   
