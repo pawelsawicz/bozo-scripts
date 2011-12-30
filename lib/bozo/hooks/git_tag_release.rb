@@ -6,9 +6,9 @@ module Bozo::Hooks
 
     def post_publish
       return unless build_server?
-      log_info "Tagging repository for release #{Bozo::Configuration.version}"
+      log_info "Tagging repository for release #{version}"
 
-      tag_name = "rel-#{Bozo::Configuration.version}"
+      tag_name = "rel-#{version}"
 
       if `git tag`.split("\n").include? tag_name
         raise Bozo::ConfigurationError.new "The tag #{tag_name} already exists"

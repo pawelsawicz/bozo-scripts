@@ -63,10 +63,10 @@ module Bozo::Packagers
     def package_version
       # If running on a build server then it is a real release, otherwise it is
       # a preview release and the version should reflect that.
-      if Bozo::Configuration.build_server
-        Bozo::Configuration.version
+      if build_server?
+        version
       else
-        "#{Bozo::Configuration.version}-pre#{env['GIT_HASH']}"
+        "#{version}-pre#{env['GIT_HASH']}"
       end
     end
     

@@ -5,7 +5,6 @@ module Bozo::Hooks
     def pre_compile
       log_info 'Generating common assembly info'
       
-      version = Bozo::Configuration.version
       git_hash = env['GIT_HASH_FULL']
       computer_name = env['COMPUTERNAME']
       trademark = computer_name ? "#{computer_name} #{git_hash}" : git_hash
