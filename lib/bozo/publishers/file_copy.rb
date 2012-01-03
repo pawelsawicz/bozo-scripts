@@ -41,7 +41,7 @@ module Bozo::Publishers
 
       copy_pairs do |source, target|
         FileUtils.mkdir_p File.dirname(target)
-        Bozo.log_debug "Publishing \"#{File.basename(source)}\" to \"#{target}\""
+        log_debug "Publishing \"#{File.basename(source)}\" to \"#{target}\""
         FileUtils.cp source, target
       end
     end

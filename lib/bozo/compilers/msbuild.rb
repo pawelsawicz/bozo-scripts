@@ -71,7 +71,7 @@ module Bozo::Compilers
       projects.each do |project_file|          
         project_name = File.basename(project_file).gsub(/\.csproj$/, '')
         
-        Bozo.log_debug project_name
+        log_debug project_name
         
         args = []
         config = configuration
@@ -99,7 +99,7 @@ module Bozo::Compilers
         
         args << "\"#{project_file}\""
         
-        Bozo.execute_command :msbuild, args
+        execute_command :msbuild, args
       end
     end
     

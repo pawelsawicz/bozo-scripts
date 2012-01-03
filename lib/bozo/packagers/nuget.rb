@@ -36,7 +36,7 @@ module Bozo::Packagers
     end
     
     def generate_specification(project)
-      Bozo.log_debug "Generating specification for #{project}"
+      log_debug "Generating specification for #{project}"
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
           doc.metadata do
@@ -63,10 +63,10 @@ module Bozo::Packagers
     def package_version
       # If running on a build server then it is a real release, otherwise it is
       # a preview release and the version should reflect that.
-      if Bozo::Configuration.build_server
-        Bozo::Configuration.version
+      if build_server?
+        version
       else
-        "#{Bozo::Configuration.version}-pre#{Bozo::ENV['GIT_HASH']}"
+        "#{version}-pre#{env['GIT_HASH']}"
       end
     end
     
@@ -84,9 +84,9 @@ module Bozo::Packagers
       # Ensure the directory is there because Nuget won't make it
       FileUtils.mkdir_p dist_dir
       
-      Bozo.log_debug "Creating nuget package for #{project}"
+      log_debug "Creating nuget package for #{project}"
       
-      Bozo.execute_command :nuget, args
+      execute_command :nuget, args
     end
     
   end
