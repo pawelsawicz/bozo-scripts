@@ -11,7 +11,7 @@ module Bozo::TestRunners
   class DotCover
     def self.default_path
       if ENV['teamcity.dotCover.home'].nil?
-        Bozo.log_debug 'Using dotcover from default installation directory'
+        log_debug 'Using dotcover from default installation directory'
 
         if ENV['ProgramFiles(x86)'].nil?
           program_files_path = ENV['ProgramFiles']
@@ -21,7 +21,7 @@ module Bozo::TestRunners
 
         File.join(program_files_path, 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
       else
-        Bozo.log_debug 'Using dotcover from teamcity.dotCover.home environment variable'
+        log_debug 'Using dotcover from teamcity.dotCover.home environment variable'
         File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe')
       end
     end
@@ -50,7 +50,7 @@ module Bozo::TestRunners
     # @param [Symbol] runner
     #     A test runner to wrap with dotcover
     def runner(runner, &block)
-      Bozo::Configuration.add_instance @runners, Bozo::TestRunners, runner, block
+      add_instance @runners, Bozo::TestRunners, runner, block
     end
 
     # Specifies whether covering with dotcover is required
@@ -75,17 +75,36 @@ module Bozo::TestRunners
 
     private
 
+    # Resolves the named class within the given namespace and then created an
+    # instance of the class before adding it to the given collection and
+    # yielding it to the configuration block when one is provided.
+    #
+    # @param [Array] collection
+    #     The collection the step executor should be added to once created.
+    # @param [Module] namespace
+    #     The module the named step executor should be found in.
+    # @param [Symbol] type
+    #     The name of the step executor.
+    # @param [Proc] block
+    #     Optional block to refine the configuration of the step executor.
+    def add_instance(collection, namespace, type, block)
+      instance = namespace.const_get(to_class_name(type)).new
+      instance.extend Bozo::Runner
+      collection << instance
+      block.call instance if block
+    end
+
     def execute_without_coverage(runner)
-      Bozo.log_debug 'Running ' + runner.class.to_s + ' without coverage'
+      log_debug 'Running ' + runner.class.to_s + ' without coverage'
       runner.execute
     end
 
     def execute_with_coverage(runner)
       if configuration[:required] & !dotcover_installed?
-        Bozo.log_fatal "Attempting to run with coverage but dotcover could not be found at #{configuration[:path]}"
+        log_fatal "Attempting to run with coverage but dotcover could not be found at #{configuration[:path]}"
       end
 
-      Bozo.log_debug 'Running ' + runner.class.to_s + ' with coverage'
+      log_debug 'Running ' + runner.class.to_s + ' with coverage'
 
       config = configuration
       dotcover_path = config[:path]
@@ -95,8 +114,8 @@ module Bozo::TestRunners
       args << '"' + dotcover_path + '"'
       args << "analyse #{coverage_path}"
 
-      Bozo.log_debug 'Running dotcover from "' + dotcover_path + '"'
-      Bozo.execute_command :dot_cover, args
+      log_debug 'Running dotcover from "' + dotcover_path + '"'
+      execute_command :dot_cover, args
     end
 
     def generate_coverage_file(runner)
