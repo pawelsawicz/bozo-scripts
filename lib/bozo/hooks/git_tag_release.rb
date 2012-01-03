@@ -5,17 +5,17 @@ module Bozo::Hooks
   class GitTagRelease
 
     def post_publish
-      return unless Bozo::Configuration.build_server
-      Bozo.log_info "Tagging repository for release #{Bozo::Configuration.version}"
+      return unless build_server?
+      log_info "Tagging repository for release #{version}"
 
-      tag_name = "rel-#{Bozo::Configuration.version}"
+      tag_name = "rel-#{version}"
 
       if `git tag`.split("\n").include? tag_name
         raise Bozo::ConfigurationError.new "The tag #{tag_name} already exists"
       end
 
-      Bozo.execute_command :git, ['git', 'tag', tag_name]
-      Bozo.execute_command :git, ['git', 'push', '--tags']
+      execute_command :git, ['git', 'tag', tag_name]
+      execute_command :git, ['git', 'push', '--tags']
     end
 
   end
