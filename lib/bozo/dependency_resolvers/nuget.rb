@@ -22,9 +22,9 @@ module Bozo::DependencyResolvers
         args << '-OutputDirectory'
         args << "\"#{File.expand_path(File.join('packages'))}\""
         
-        Bozo.log_debug "Resolving nuget dependencies for #{path}"
+        log_debug "Resolving nuget dependencies for #{path}"
         
-        Bozo.execute_command :nuget, args
+        execute_command :nuget, args
       end
     end
     

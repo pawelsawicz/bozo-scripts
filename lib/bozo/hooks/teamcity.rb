@@ -5,7 +5,6 @@ module Bozo::Hooks
     def pre_compile
       return unless Teamcity.hosted_in_teamcity?
       log_pre_step :compile
-      version = Bozo::Configuration.version
 
       puts "##teamcity[buildNumber '#{version}']"
       # currently a general compiler which wraps everything. Once a compiler hook is added can distinguish

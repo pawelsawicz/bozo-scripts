@@ -84,7 +84,7 @@ module Bozo::Hooks
           end
         end
 
-        Bozo.execute_command :fx_cop, args
+        execute_command :fx_cop, args
       end
     end
 
@@ -99,7 +99,7 @@ module Bozo::Hooks
       args << "/project:\"#{config[:project]}\""
       args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
-      Bozo.execute_command :fx_cop, args
+      execute_command :fx_cop, args
     end
 
     # List of compiled assemblies and executables
