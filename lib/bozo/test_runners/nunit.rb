@@ -75,12 +75,7 @@ module Bozo::TestRunners
     end
     
     def execute
-      args = []
-
-      args << runner_path
-      args |= runner_args
-
-      execute_command :nunit, args
+      execute_command :nunit, [runner_path] << runner_args
     end
     
     def expand_path(*args)
