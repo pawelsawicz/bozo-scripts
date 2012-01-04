@@ -40,8 +40,8 @@ module Bozo::TestRunners
     # @returns [String]
     def runner_path
       nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', 'nunit-console.exe')
-      log_and_die 'No NUnit runners found. You must install one via nuget.' if nunit_runners.empty?
-      log_and_die 'Multiple NUnit runners found. There should only be one.' if nunit_runners.size > 1
+      raise nunit_runner_not_found if nunit_runners.empty?
+      raise multiple_runners_found if nunit_runners.size > 1
 
       nunit_runner = nunit_runners.first
 
@@ -77,6 +77,16 @@ module Bozo::TestRunners
     def execute
       execute_command :nunit, [runner_path] << runner_args
     end
+
+    private
+
+    def nunit_runner_not_found
+      Bozo::ConfigurationError.new 'No NUnit runners found. You must install one via nuget.'
+    end
+
+    def multiple_runners_found
+      Bozo::ConfigurationError.new 'Multiple NUnit runners found. There should only be one.'
+    end
     
     def expand_path(*args)
       File.expand_path(File.join(args))
@@ -84,11 +94,6 @@ module Bozo::TestRunners
     
     def expand_and_glob(*args)
       Dir[expand_path(*args)]
-    end
-    
-    def log_and_die(msg)
-      log_fatal msg
-      raise msg
     end
   
   end
