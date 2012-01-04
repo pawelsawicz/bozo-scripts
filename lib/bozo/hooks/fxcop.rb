@@ -42,13 +42,18 @@ module Bozo::Hooks
     end
 
     # Specifies the fxcop path
-    def path(path)
-      @config[:path] = path
+    def path(path = nil)
+      @config[:path] = path unless path.nil?
+      
+      @config[:path]
     end
 
     # Runs the post_compile hook
     def post_compile
       config = configuration
+
+      raise no_executable_path_specified if path.nil?
+      raise no_executable_exists unless File.exists?(path)
 
       if config[:project].nil?
         execute_projects config
@@ -79,13 +84,11 @@ module Bozo::Hooks
     # @param [Hash] config
     #     The fxcop configuration
     def execute_projects(config)
-      log_debug "Executing projects with '#{config[:path]}'" if config[:framework_versions].any?
-
-      log_fatal "No path specified for fxcop" if config[:path].nil?
+      log_debug "Executing projects with '#{path}'" if config[:framework_versions].any?
 
       config[:framework_versions].each do |framework_version|
         args = []
-        args << '"' + config[:path] + '"'
+        args << '"' + path + '"'
         args << "/out:#{output_path}\\FxCop-#{framework_version}-Results.xml"
         args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
@@ -107,17 +110,27 @@ module Bozo::Hooks
     # @param [Hash] config
     #     The fxcop configuration
     def execute_fxcop_project(config)
-      log_debug "Executing fxcop project '#{config[:project]}' with '#{config[:path]}'"
-
-      log_fatal "No path specified for fxcop" if config[:path].nil?
+      log_debug "Executing fxcop project '#{config[:project]}' with '#{path}'"
 
       args = []
-      args << '"' + config[:path] + '"'
+      args << '"' + path + '"'
       args << "/out:\"#{output_path}\\FxCop-#{File.basename(config[:project], '.*')}-Results.xml\""
       args << "/project:\"#{config[:project]}\""
       args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
       execute_command :fx_cop, args
+    end
+
+    # Create a new error specifying that the executable path
+    # has not been specified.
+    def no_executable_path_specified
+      ConfigurationError.new "No path specified for fxcop"
+    end
+
+    # Create a new error specifying that the fxcop executable
+    # does not exist at the path.
+    def no_executable_exists
+      ConfigurationError.new "FxCop executable does not exist at #{path}"
     end
 
     # List of compiled assemblies and executables
