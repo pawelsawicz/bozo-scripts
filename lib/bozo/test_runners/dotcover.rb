@@ -104,7 +104,7 @@ module Bozo::TestRunners
         log_fatal "Attempting to run with coverage but dotcover could not be found at #{configuration[:path]}"
       end
 
-      log_debug 'Running ' + runner.class.to_s + ' with coverage'
+      log_debug "Running #{runner.class} with coverage"
 
       config = configuration
       dotcover_path = config[:path]
