@@ -61,15 +61,17 @@ module Bozo::TestRunners
     #
     # @param [boolean] required
     #     Whether dotCover coverage is required
-    def required?(required)
-      @config[:required] = required
+    def required?(required = nil)
+      @config[:required] = required unless required.nil?
+      
+      @config[:required]
     end
 
     def execute
       @runners.each do |runner|
-        execute_with_coverage(runner) if (configuration[:required] || dotcover_installed?)
+        execute_with_coverage(runner) if (required? || dotcover_installed?)
 
-        execute_without_coverage(runner) unless configuration[:required]
+        execute_without_coverage(runner) unless required?
       end
     end
 
@@ -100,7 +102,7 @@ module Bozo::TestRunners
     end
 
     def execute_with_coverage(runner)
-      if configuration[:required] & !dotcover_installed?
+      if required? & !dotcover_installed?
         log_fatal "Attempting to run with coverage but dotcover could not be found at #{configuration[:path]}"
       end
 
