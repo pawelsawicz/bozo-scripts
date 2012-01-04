@@ -50,7 +50,7 @@ module Bozo::TestRunners
     # @param [Symbol] runner
     #     A test runner to wrap with dotcover
     def runner(runner, &block)
-      add_instance @runners, Bozo::TestRunners, runner, block
+      add_instance runner, block
     end
 
     # Specifies whether covering with dotcover is required
@@ -81,18 +81,14 @@ module Bozo::TestRunners
     # instance of the class before adding it to the given collection and
     # yielding it to the configuration block when one is provided.
     #
-    # @param [Array] collection
-    #     The collection the step executor should be added to once created.
-    # @param [Module] namespace
-    #     The module the named step executor should be found in.
     # @param [Symbol] type
     #     The name of the step executor.
     # @param [Proc] block
     #     Optional block to refine the configuration of the step executor.
-    def add_instance(collection, namespace, type, block)
-      instance = namespace.const_get(to_class_name(type)).new
+    def add_instance(type, block)
+      instance = Bozo::TestRunners.const_get(to_class_name(type)).new
       instance.extend Bozo::Runner
-      collection << instance
+      @runners << instance
       block.call instance if block
     end
 
