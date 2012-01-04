@@ -14,7 +14,7 @@ module Bozo::DependencyResolvers
     # @param [String] url
     #     A NuGet package resolving URL.
     def source(url)
-      @sources << path
+      @sources << url
     end
 
     # Returns the build tools required for this dependency resolver to run
