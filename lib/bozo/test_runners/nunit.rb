@@ -1,5 +1,14 @@
 module Bozo::TestRunners
 
+  # A TestRunner for NUnit
+  #
+  #
+  # == Dotcover integration
+  # To enable integration with the dotcover test runner the following
+  # interface needs to be used
+  #
+  #   runner_path # should return the path to the runners executable
+  #   runner_args # should return the arguments to be passed to use
   class Nunit
   
     def initialize
@@ -26,6 +35,9 @@ module Bozo::TestRunners
       "Run tests with nunit against projects #{@projects}"
     end
 
+    # Returns the path to the runner's executable.
+    #
+    # @returns [String]
     def runner_path
       nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', 'nunit-console.exe')
       log_and_die 'No NUnit runners found. You must install one via nuget.' if nunit_runners.empty?
@@ -38,6 +50,9 @@ module Bozo::TestRunners
       nunit_runner
     end
 
+    # Returns the arguments required for the runner's executable.
+    #
+    # @returns [Array]
     def runner_args
       args = []
 
