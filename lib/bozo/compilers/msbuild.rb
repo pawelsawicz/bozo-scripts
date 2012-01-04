@@ -76,14 +76,7 @@ module Bozo::Compilers
         args = []
         config = configuration
         
-        framework_version = 'unknown'
-        
-        File.open(project_file) do |f|        
-          framework_version = Nokogiri::XML(f).css('Project PropertyGroup TargetFrameworkVersion').first.content
-          framework_version = framework_version.sub('v', 'net').sub('.', '')
-        end
-        
-        config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', project_name, framework_version))
+        config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', project_name, framework_version(project_file)))
         config[:properties][:solutiondir] = File.expand_path('.')
         
         args << File.join(ENV['WINDIR'], 'Microsoft.NET', config[:framework], config[:version], 'msbuild.exe')
@@ -110,6 +103,27 @@ module Bozo::Compilers
     
     def required_tools
       :stylecop unless @config[:without_stylecop]
+    end
+    
+    private
+    
+    # Returns the framework version used by the project file.
+    # 
+    # If it cannot be determined from the project file then it falls back to
+    # <tt>net20</tt>.
+    # 
+    # @param [String] project_file
+    #     The path to the project file to inspect for the framework version.
+    def framework_version(project_file)
+      framework = 'net20'
+      
+      File.open(project_file) do |f|
+        xml = Nokogiri::XML(f)
+        project_framework = xml.css('Project PropertyGroup TargetFrameworkVersion').first
+        framework = project_framework.content.sub('v', 'net').sub('.', '') unless project_framework.nil?
+      end
+      
+      framework
     end
     
   end
