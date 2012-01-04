@@ -119,10 +119,13 @@ module Bozo::TestRunners
     def generate_coverage_file(runner)
       output_file = File.expand_path(File.join('temp', 'dotcover', "#{Time.now.to_i}-dotcover-report.xml"))
 
+      runner_args = runner.runner_args
+      runner_args.flatten!
+
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.AnalyseParams do
           doc.Executable runner.runner_path.gsub(/\//, '\\')
-          doc.Arguments runner.runner_args.join(' ')
+          doc.Arguments runner_args.join(' ')
           doc.WorkingDir File.expand_path(File.join('temp', 'dotcover'))
           doc.Output output_file
         end
