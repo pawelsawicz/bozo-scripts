@@ -41,7 +41,7 @@ module Bozo::Hooks
 
     # Returns whether teamcity is hosting bozo
     def self.hosted_in_teamcity?
-      ENV['TEAMCITY_VERSION'] != nil
+      not ENV['TEAMCITY_VERSION'].nil?
     end
 
     private
