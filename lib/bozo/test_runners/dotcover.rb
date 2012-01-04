@@ -68,10 +68,10 @@ module Bozo::TestRunners
     end
 
     def execute
-      @runners.each do |runner|
-        execute_with_coverage(runner) if (required? || dotcover_installed?)
-
-        execute_without_coverage(runner) unless required?
+      if required? or dotcover_installed?
+        @runners.each {|runner| execute_with_coverage runner}
+      else
+        @runners.each {|runner| execute_without_coverage(runner)}
       end
     end
 
