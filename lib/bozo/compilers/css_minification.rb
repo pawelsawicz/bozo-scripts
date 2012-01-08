@@ -18,9 +18,9 @@ module Bozo::Compilers
 
       files.each do |f|
         css = File.read(f)
-        a = compressor.compress css unless exclude.include?(f)
-        a = css if exclude.include?(f)
-        File.open(output_filename(f), 'w') {|t| t.write(a) }
+        minified = compressor.compress css unless exclude.include?(f)
+        minified = css if exclude.include?(f)
+        File.open(output_filename(f), 'w') {|t| t.write(minified) }
       end
     end
 

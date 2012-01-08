@@ -15,9 +15,9 @@ module Bozo::Compilers
       exclude = get_exclusion_files()
 
       files.each do |f|
-        a = Uglifier.compile(File.read(f)) unless exclude.include?(f)
-        a = File.read(f) if exclude.include?(f)
-        File.open(output_filename(f), 'w') {|t| t.write(a) }
+        minified = Uglifier.compile(File.read(f)) unless exclude.include?(f)
+        minified = File.read(f) if exclude.include?(f)
+        File.open(output_filename(f), 'w') {|t| t.write(minified) }
       end
     end
 
