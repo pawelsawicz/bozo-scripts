@@ -3,6 +3,8 @@ $:.push File.expand_path(File.dirname(__FILE__))
 require 'fileutils'
 require 'rainbow'
 require 'bozo/version'
+require 'bozo/compilers/css_minification'
+require 'bozo/compilers/js_minification'
 require 'bozo/compilers/msbuild'
 require 'bozo/dependency_resolvers/nuget'
 require 'bozo/hooks/common_assembly_info'

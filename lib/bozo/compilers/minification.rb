@@ -1,26 +1,19 @@
-require 'uglifier'
-require "yui/compressor"
-
 module Bozo::Compilers
 
   class Minification
 
     def initialize
-      @types = Hash.new
-      minify :js
-      minify :css
+      @exclude = []
       @include_version = false
     end
 
-    # add the type of files to minify
+    # adds an exclusion pattern of files to not minify
     #
-    # @param type[:symbol]
-    #     type of the files to minify
-    # @param exclude[Array]
-    #     array containing files to exclude
-    def minify(type, exclude = nil)
-      exclude = ["**/*.min.#{type}"] if exclude.nil?
-      @types[type] = exclude
+    # @param exclude[String]
+    #     value containing pattern to exclude
+    def exclude(exclude = nil)
+      @exclude << exclude unless exclude.nil?
+      @exclude
     end
 
     # include the version number in the minified file name
@@ -28,46 +21,26 @@ module Bozo::Compilers
       @include_version = true
     end
 
-    def execute
-      minify_css if @types.include?(:css)
-      minify_js if @types.include?(:js)
-    end
-
     private
 
-    def minify_js
-      files = get_minify_files(:js)
-      exclude = get_exclusion_files(:js, @types[:js])
-
-      files.each do |f|
-        a = Uglifier.compile(File.read(f)) unless exclude.include?(f)
-        a = File.read(f) if exclude.include?(f)
-        File.open(output_filename(f), 'w') {|t| t.write(a) }
-      end
-    end
-
-    def minify_css
-      compressor = YUI::CssCompressor.new
-
-      files = get_minify_files(:css)
-      exclude = get_exclusion_files(:css, @types[:css])
-
-      files.each do |f|
-        css = File.read(f)
-        a = compressor.compress css unless exclude.include?(f)
-        a = css if exclude.include?(f)
-        File.open(output_filename(f), 'w') {|t| t.write(a) }
-      end
-    end
-
-    def get_minify_files(type)
+    # gets all the files of the specified type
+    #
+    # @param type[:symbol]
+    #     the file extension type
+    def get_files(type)
       file_matcher = File.expand_path(File.join('src', '**', "*.#{type}"))
       Dir[file_matcher]
     end
 
-    def get_exclusion_files(type, exclude)
-      file_matcher = File.expand_path(File.join('src', exclude))
-      Dir[file_matcher]
+    # gets all the files that should be excluded from minification
+    def get_exclusion_files()
+      files_to_exclude = []
+      @exclude.each do |e|
+        file_matcher = File.expand_path(File.join('src', e))
+        files_to_exclude << Dir[file_matcher]
+      end
+
+      files_to_exclude.flatten!
     end
 
     def output_filename(original_path)
