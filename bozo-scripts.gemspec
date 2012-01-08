@@ -18,4 +18,6 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "nokogiri"
   s.add_runtime_dependency "erubis"
+  s.add_runtime_dependency "uglifier"
+  s.add_runtime_dependency "yui-compressor"
 end
