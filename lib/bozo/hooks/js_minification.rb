@@ -1,16 +1,16 @@
 require 'uglifier'
 require 'minification'
 
-module Bozo::Compilers
+module Bozo::Hooks
 
-  class JsMinification < Bozo::Compilers::Minification
+  class JsMinification < Bozo::Hooks::Minification
 
     def initialize
       super
       exclude "**/*.min.js"
     end
 
-    def execute
+    def pre_package
       files = get_files(:js)
       exclude = get_exclusion_files()
 

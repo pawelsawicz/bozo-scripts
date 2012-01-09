@@ -1,16 +1,16 @@
 require "yui/compressor"
 require 'minification'
 
-module Bozo::Compilers
+module Bozo::Hooks
 
-  class CssMinification < Bozo::Compilers::Minification
+  class CssMinification < Bozo::Hooks::Minification
 
     def initialize
       super
       exclude "**/*.min.css"
     end
 
-    def execute
+    def pre_package
       compressor = YUI::CssCompressor.new
 
       files = get_files(:css)

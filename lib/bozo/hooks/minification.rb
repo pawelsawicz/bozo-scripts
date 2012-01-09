@@ -1,4 +1,4 @@
-module Bozo::Compilers
+module Bozo::Hooks
 
   class Minification
 
