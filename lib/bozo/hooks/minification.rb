@@ -28,7 +28,7 @@ module Bozo::Hooks
     # @param type[:symbol]
     #     the file extension type
     def get_files(type)
-      file_matcher = File.expand_path(File.join('src', '**', "*.#{type}"))
+      file_matcher = File.expand_path(File.join('temp', '**', "*.#{type}"))
       Dir[file_matcher]
     end
 
@@ -36,7 +36,7 @@ module Bozo::Hooks
     def get_exclusion_files()
       files_to_exclude = []
       @exclude.each do |e|
-        file_matcher = File.expand_path(File.join('src', e))
+        file_matcher = File.expand_path(File.join('temp', e))
         files_to_exclude << Dir[file_matcher]
       end
 
@@ -44,9 +44,7 @@ module Bozo::Hooks
     end
 
     def output_filename(original_path)
-      tmp = File.join('temp', 'web')
-      FileUtils.mkdir_p tmp
-      output_path = File.join(tmp, File.basename(original_path, '.*'))
+      output_path = File.join(File.dirname(original_path), File.basename(original_path, '.*'))
       output_path = "#{output_path}-#{version}" if @include_version
       output_path = "#{output_path}#{File.extname(original_path)}"
       output_path
