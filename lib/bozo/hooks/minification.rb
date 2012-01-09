@@ -5,6 +5,7 @@ module Bozo::Hooks
     def initialize
       @exclude = []
       @include_version = false
+      @include_min_extension = false
     end
 
     # adds an exclusion pattern of files to not minify
@@ -19,6 +20,11 @@ module Bozo::Hooks
     # include the version number in the minified file name
     def include_version_number
       @include_version = true
+    end
+
+    # include the '.min' extension on the file name
+    def include_min_extension
+      @include_min_extension = true
     end
 
     private
@@ -46,6 +52,7 @@ module Bozo::Hooks
     def output_filename(original_path)
       output_path = File.join(File.dirname(original_path), File.basename(original_path, '.*'))
       output_path = "#{output_path}-#{version}" if @include_version
+      output_path = "#{output_path}.min" if @include_min_extension
       output_path = "#{output_path}#{File.extname(original_path)}"
       output_path
     end
