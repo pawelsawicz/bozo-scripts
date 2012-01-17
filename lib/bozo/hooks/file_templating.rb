@@ -215,13 +215,13 @@ module Bozo::Hooks
       # Create a new error specifying that a value was set outside the bounds
       # of a group.
       def value_outside_group
-        ConfigurationError.new "Values can only be set within a group"
+        Bozo::ConfigurationError.new "Values can only be set within a group"
       end
 
       # Create a new error specifying that an attempt was made to create a
       # nested group.
       def nested_group
-        ConfigurationError.new "Groups cannot be nested"
+        Bozo::ConfigurationError.new "Groups cannot be nested"
       end
 
       # Class for controlling the creation and retrieval of configuration
@@ -272,7 +272,7 @@ module Bozo::Hooks
         # @param [Symbol] sym
         #     The name of the group.
         def missing_group(sym)
-          ConfigurationError.new "Configuration does not contain a group called '#{sym}' - #{@hash.keys}"
+          Bozo::ConfigurationError.new "Configuration does not contain a group called '#{sym}' - #{@hash.keys}"
         end
 
       end
@@ -321,7 +321,7 @@ module Bozo::Hooks
         # @param [Symbol] sym
         #     The key that does not exist.
         def missing_key(sym)
-          ConfigurationError.new "Configuration group '#{@group}' does not contain a value for '#{sym}' - #{@hash.inspect}"
+          Bozo::ConfigurationError.new "Configuration group '#{@group}' does not contain a value for '#{sym}' - #{@hash.inspect}"
         end
 
       end
