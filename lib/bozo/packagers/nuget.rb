@@ -5,15 +5,20 @@ module Bozo::Packagers
   class Nuget
     
     def initialize
-      @projects = []
+      @libraries = []
+      @executables = []
     end
     
     def destination(destination)
       @destination = destination
     end
     
-    def project(project)
-      @projects << project
+    def library(project)
+      @libraries << project
+    end
+
+    def executable(project)
+      @executables << project
     end
     
     def required_tools
@@ -21,18 +26,28 @@ module Bozo::Packagers
     end
     
     def to_s
-      "Publish projects with nuget #{@projects} to #{@destination}"
+      "Publish projects with nuget #{@libraries | @executables} to #{@destination}"
     end
     
     def execute
-      @projects.each {|project| package_project(project)}
+      @libraries.each {|project| package_library project}
+      @executables.each {|project| package_executable project}
     end
 
     private
     
-    def package_project(project)
-      spec_path = generate_specification(project)
+    def package_library(project)
+      spec_path = generate_specification(project) do |doc|
+        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'lib')
+      end
       create_package(project, spec_path)
+    end
+
+    def package_executable(project)
+      spec_path = generate_specification(project) do |doc|
+        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe')
+      end
+      create_package(project, spec_path, true)
     end
     
     def generate_specification(project)
@@ -48,8 +63,7 @@ module Bozo::Packagers
             doc.licenseUrl 'http://www.zopa.com'
           end
           doc.files do
-            doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.dll')).gsub(/\//, '\\'), :target => 'lib')
-            doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.pdb')).gsub(/\//, '\\'), :target => 'lib')
+            yield doc            
           end
         end
       end
@@ -70,7 +84,7 @@ module Bozo::Packagers
       end
     end
     
-    def create_package(project, spec_path)
+    def create_package(project, spec_path, omit_analysis = false)
       args = []
       
       dist_dir = File.expand_path(File.join('dist', 'nuget'))
@@ -80,6 +94,7 @@ module Bozo::Packagers
       args << "\"#{spec_path}\""
       args << '-OutputDirectory'
       args << "\"#{dist_dir}\""
+      args << '-NoPackageAnalysis' if omit_analysis
       
       # Ensure the directory is there because Nuget won't make it
       FileUtils.mkdir_p dist_dir
