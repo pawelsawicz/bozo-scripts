@@ -14,9 +14,9 @@ module Bozo::Hooks
   # wished.
   # 
   # By default the hook will load <tt>default.rb</tt> followed by
-  # <tt>[environment].rb</tt> from the configured config_path if the file
-  # exists. It will then load any files explicitly required through the
-  # config_file method.
+  # <tt>[environment].rb</tt> followed by <tt>[machine_name].rb</tt> from the
+  # configured config_path if the file exists. It will then load any files
+  # explicitly required through the config_file method.
   # 
   # == Hook configuration
   # 
@@ -151,7 +151,10 @@ module Bozo::Hooks
     # @param [Configuration] config
     #     The configuration object to load the files into if they are present.
     def load_default_files(config)
-      ['default.rb', "#{environment}.rb"].each do |file|
+      default_files = ['default.rb', "#{environment}.rb"]
+      default_files << "#{env['MACHINENAME']}.rb" if env['MACHINENAME']
+
+      default_files.each do |file|
         path = File.join(@config_path, file)
         config.load path if File.exist? path
       end
