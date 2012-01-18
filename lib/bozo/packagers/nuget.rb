@@ -30,8 +30,6 @@ module Bozo::Packagers
     end
     
     def execute
-      puts "#{@libraries}"
-      puts "#{@executables}"
       @libraries.each {|project| package_library project}
       @executables.each {|project| package_executable project}
     end
@@ -46,11 +44,10 @@ module Bozo::Packagers
     end
 
     def package_executable(project)
-      puts "PACKAGING #{project}"
       spec_path = generate_specification(project) do |doc|
         doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe')
       end
-      create_package(project, spec_path)
+      create_package(project, spec_path, true)
     end
     
     def generate_specification(project)
@@ -87,7 +84,7 @@ module Bozo::Packagers
       end
     end
     
-    def create_package(project, spec_path)
+    def create_package(project, spec_path, omit_analysis = false)
       args = []
       
       dist_dir = File.expand_path(File.join('dist', 'nuget'))
@@ -97,6 +94,7 @@ module Bozo::Packagers
       args << "\"#{spec_path}\""
       args << '-OutputDirectory'
       args << "\"#{dist_dir}\""
+      args << '-NoPackageAnalysis' if omit_analysis
       
       # Ensure the directory is there because Nuget won't make it
       FileUtils.mkdir_p dist_dir
