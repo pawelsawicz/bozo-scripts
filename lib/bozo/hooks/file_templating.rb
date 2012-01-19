@@ -46,8 +46,8 @@ module Bozo::Hooks
   #   {:example => {:one => 'foo', :two => 'bar'}}
   # 
   # A configuration file can overwrite the values specified by a preceding one
-  # without error. Groups can be opened and closed as desired but note that
-  # nests groups are not allowed.
+  # without error. Groups can be opened and closed as desired and nesting
+  # groups is possible.
   # 
   # == Template files
   # 
