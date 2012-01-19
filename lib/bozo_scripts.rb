@@ -2,6 +2,8 @@ $:.push File.expand_path(File.dirname(__FILE__))
 
 require 'fileutils'
 require 'rainbow'
+require 'bozo'
+require 'bozo/configuration'
 require 'bozo/version'
 require 'bozo/compilers/msbuild'
 require 'bozo/dependency_resolvers/nuget'
