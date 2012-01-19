@@ -40,7 +40,7 @@ module Bozo::DependencyResolvers
     def add_package_sources
       existing = `#{nuget_path} sources List` if @sources.any?
 
-      @sources.select {|source| not existing.include? source}.each do |source|
+      @sources.select {|source| not existing.upcase.include? source.upcase}.each do |source|
         quoted_source = "\"#{source}\""
         log_debug "Missing nuget package source #{quoted_source}"
 
