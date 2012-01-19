@@ -165,7 +165,8 @@ module Bozo::Hooks
 
       # Create a new instance.
       def initialize
-        @configuration = GroupsHash.new
+        @root = ConfigurationGroup.new
+        @group_stack = [@root]
       end
       
       # Begin the definition of a group with the given name.
@@ -173,10 +174,10 @@ module Bozo::Hooks
       # @param [Symbol] name
       #     The name of the group.
       def group(name)
-        raise nested_group unless @active_group.nil?
-        @active_group = @configuration.ensure_child name
+        new_group = @group_stack.last.ensure_child name
+        @group_stack.push new_group
         yield
-        @active_group = nil
+        @group_stack.pop
       end
 
       # Set the value of the given key within the active group.
@@ -186,8 +187,7 @@ module Bozo::Hooks
       # @param [Object] value
       #     The value to set the key to within the active group.
       def set(key, value)
-        raise value_outside_group if @active_group.nil?
-        @active_group.set_value(key, value)
+        @group_stack.last.set_value(key, value)
       end
       
       # Load the specified file as an additional configuration file.
@@ -205,42 +205,31 @@ module Bozo::Hooks
       #     The template content.
       def transform(template)
         erb_template = Erubis::Eruby.new template
-        @configuration.evaluate_template(erb_template)
+        @root.evaluate_template(erb_template)
       end
 
       # Return the current state of the configuration.
       def inspect
-        @configuration.inspect
+        @root.inspect
       end
       
       private
-      
-      # Create a new error specifying that a value was set outside the bounds
-      # of a group.
-      def value_outside_group
-        Bozo::ConfigurationError.new "Values can only be set within a group"
-      end
-
-      # Create a new error specifying that an attempt was made to create a
-      # nested group.
-      def nested_group
-        Bozo::ConfigurationError.new "Groups cannot be nested"
-      end
 
       # Class for controlling the creation and retrieval of configuration
-      # groups.
+      # groups and values.
       # 
       # Should not be used outside of this class.
-      class GroupsHash # :nodoc:
+      class ConfigurationGroup # :nodoc:
 
         # Create a new instance.
-        def initialize
+        def initialize(*parents)
+          @parents = parents
           @hash = {}
         end
 
         # Enables the fluent retrieval of groups within the hash.
         def method_missing(sym, *args, &block)
-          raise missing_group sym unless @hash.key? sym
+          raise missing_child sym unless @hash.key? sym
           @hash[sym]
         end
 
@@ -250,12 +239,22 @@ module Bozo::Hooks
         # @param [Symbol] key
         #     The key that must contain a child hash.
         def ensure_child(key)
-          @hash[key] = GroupValuesHash.new(key) unless @hash.key? key
+          @hash[key] = ConfigurationGroup.new(@parents + [key]) unless @hash.key? key
           @hash[key]
+        end
+        
+        # Sets the value of the specified key.
+        # 
+        # @param [Symbol] key
+        #     The key to set the value of.
+        # @param [Object] value
+        #     The value to set for the specified key.
+        def set_value(key, value)
+          @hash[key] = value
         end
 
         # Resolves a template using itself as the binding context.
-        # 
+        #
         # @param [Erubis::Eruby] template
         #     The template to generate the result for.
         def evaluate_template(template)
@@ -270,61 +269,12 @@ module Bozo::Hooks
         private
         
         # Create a new error specifying that an attempt was made to retrieve a
-        # group that does not exist.
+        # child that does not exist.
         # 
         # @param [Symbol] sym
-        #     The name of the group.
-        def missing_group(sym)
-          Bozo::ConfigurationError.new "Configuration does not contain a group called '#{sym}' - #{@hash.keys}"
-        end
-
-      end
-
-      # Class for controlling the creation and retrieval of values within a
-      # configuration group.
-      # 
-      # Should not be used outside of this class.
-      class GroupValuesHash # :nodoc:
-
-        # Create a new instance.
-        # 
-        # @param [Symbol] group
-        #     The name of the parent group.
-        def initialize(group)
-          @group = group
-          @hash = {}
-        end
-
-        # Enables the fluent retrieval of values within the hash.
-        def method_missing(sym, *args, &block)
-          raise missing_key sym unless @hash.key? sym
-          @hash[sym]
-        end
-        
-        # Sets the value of the specified key.
-        # 
-        # @param [Symbol] key
-        #     The key to set the value of.
-        # @param [Object] value
-        #     The value to set for the specified key.
-        def set_value(key, value)
-          @hash[key] = value
-        end
-
-        # Return the current state of the configuration.
-        def inspect
-          @hash.inspect
-        end
-        
-        private
-        
-        # Create a new error specifying that an attempt was made to retrieve a
-        # key that does not exist.
-        # 
-        # @param [Symbol] sym
-        #     The key that does not exist.
-        def missing_key(sym)
-          Bozo::ConfigurationError.new "Configuration group '#{@group}' does not contain a value for '#{sym}' - #{@hash.inspect}"
+        #     The key of the requested child.
+        def missing_child(sym)
+          Bozo::ConfigurationError.new "#{@parents.any? ? @parents.join('.') : 'Root'} does not contain a value or group called '#{sym}' - known keys: #{@hash.keys.join(', ')}"
         end
 
       end
