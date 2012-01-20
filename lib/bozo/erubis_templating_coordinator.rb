@@ -50,7 +50,7 @@ module Bozo
     # @param [Configuration] configuration
     #     The configuration to use with templates. If not specified a new
     #     object is created.
-    def initialize(configuration = Configuration.new)
+    def initialize(configuration = Bozo::Configuration.new)
       @templates = []
       @configuration = configuration
     end
