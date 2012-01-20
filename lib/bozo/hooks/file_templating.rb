@@ -126,13 +126,6 @@ module Bozo::Hooks
       add_default_config_files coordinator
       @config_files.each {|f| coordinator.required_config_file f}
     end
-
-    # Adds the templates to the templating coordinator.
-    def add_templates(coordinator)
-      @template_globs.each do |glob|
-        coordinator.add_templates glob
-      end
-    end
     
     # Adds the default configuration from the configuration directory to the
     # templating coordinator.
@@ -145,6 +138,13 @@ module Bozo::Hooks
 
       default_files.each do |file|
         coordinator.config_file File.join(@config_path, file)
+      end
+    end
+
+    # Adds the templates to the templating coordinator.
+    def add_templates(coordinator)
+      @template_globs.each do |glob|
+        coordinator.template_files glob
       end
     end
 
