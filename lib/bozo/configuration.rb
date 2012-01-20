@@ -57,7 +57,7 @@ module Bozo
     end
 
     # Yields the internal binding of the configuration to the given block.
-    # 
+    #
     # @param [Proc] block
     #     The block to yield the configuration's internal binding to.
     def apply(&block)
@@ -68,12 +68,12 @@ module Bozo
     def inspect
       @root.inspect
     end
-    
+
     private
 
     # Class for controlling the creation and retrieval of configuration
     # groups and values.
-    # 
+    #
     # Should not be used outside of this class.
     class ConfigurationGroup # :nodoc:
 
@@ -91,16 +91,16 @@ module Bozo
 
       # Ensures the hash contains a child hash for the specified key and
       # returns it.
-      # 
+      #
       # @param [Symbol] key
       #     The key that must contain a child hash.
       def ensure_child(key)
         @hash[key] = ConfigurationGroup.new(@parents + [key]) unless @hash.key? key
         @hash[key]
       end
-      
+
       # Sets the value of the specified key.
-      # 
+      #
       # @param [Symbol] key
       #     The key to set the value of.
       # @param [Object] value
@@ -111,7 +111,7 @@ module Bozo
 
       # Yields the internal binding of the configuration group to the given
       # block.
-      # 
+      #
       # @param [Proc] block
       #     The block to yield the internal binding to.
       def apply(block)
@@ -122,12 +122,12 @@ module Bozo
       def inspect
         @hash.inspect
       end
-      
+
       private
       
       # Create a new error specifying that an attempt was made to retrieve a
       # child that does not exist.
-      # 
+      #
       # @param [Symbol] sym
       #     The key of the requested child.
       def missing_child(sym)

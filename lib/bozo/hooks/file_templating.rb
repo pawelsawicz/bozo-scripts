@@ -1,5 +1,3 @@
-require 'erubis'
-
 module Bozo::Hooks
   
   # Hook for creating files based upon configuration files and ERB-style
@@ -69,10 +67,10 @@ module Bozo::Hooks
     # Creates a new instance.
     def initialize
       @config_path = 'config'
-      @source_file_globs = []
+      @template_globs = []
       @config_files = []
     end
-    
+
     # Sets the path of the directory within which the hook should look for the
     # default configuration files.
     # 
@@ -91,13 +89,13 @@ module Bozo::Hooks
       @config_files << path
     end
     
-    # Adds a set of source files to be generated.
+    # Adds a set of templates files from which to generate files.
     # 
     # @param [String] glob
     #     A glob that points to a set of files that should pass through the 
-    #     template.
-    def source_files(glob)
-      @source_file_globs << glob
+    #     templating engine.
+    def template_files(glob)
+      @template_globs << glob
     end
     
     # Generate all the files matching the configuration.
@@ -105,62 +103,51 @@ module Bozo::Hooks
       log_info '' # formatting
       log_info 'Generating files'
       
-      config = load_configuration
-      
-      @source_file_globs.each do |glob|
-        Dir[glob].each {|file| generate_file config, file}
+      get_coordinator.generate_files do |template, target|
+        log_debug "Generating #{target} from #{template}"
       end
     end
     
     private
-    
-    # Create a new configuration object loading the default files when present
-    # and all the explicitly added configuration files.
-    def load_configuration
-      config = Configuration.new
-      
-      load_default_files config
-      @config_files.each {|f| config.load f}
-      
-      config
-    end
-    
-    # Generate the file relating to the template file using the given
+
+    # Creates a new templating coordinator based upon the current
     # configuration.
-    # 
-    # @param [Configuration] config
-    #     The configuration that should be used to generate the file.
-    # @param [String] template_file
-    #     The path of the template file that should be filled using the
-    #     configuration.
-    def generate_file(config, template_file)
-      target_file = template_file.sub /\.[^\.]+$/, ''
-      
-      log_debug "Found template #{template_file}"
-      template_content = IO.read template_file
-      template = Erubis::Eruby.new template_content
-      
-      log_debug "Generating #{target_file}"
-      content = config.apply {|binding| template.result(binding)}
-      File.open(target_file, 'w+') {|f| f.write(content)}
+    def get_coordinator
+      coordinator = Bozo::ErubisTemplatingCoordinator.new
+
+      add_config coordinator
+      add_templates coordinator
+
+      coordinator
+    end
+
+    # Adds the configuration to the templating coordinator.
+    def add_config(coordinator)
+      add_default_config_files coordinator
+      @config_files.each {|f| coordinator.required_config_file f}
+    end
+
+    # Adds the templates to the templating coordinator.
+    def add_templates(coordinator)
+      @template_globs.each do |glob|
+        coordinator.add_templates glob
+      end
     end
     
-    # Load the default files from the configuration directory if they are
-    # present.
+    # Adds the default configuration from the configuration directory to the
+    # templating coordinator.
     # 
-    # @param [Configuration] config
-    #     The configuration object to load the files into if they are present.
-    def load_default_files(config)
+    # @param [ErubisTemplatingCoordinator] coordinator
+    #     The template coordinator to add the configuration to.
+    def add_default_config_files(coordinator)
       default_files = ['default.rb', "#{environment}.rb"]
       default_files << "#{env['MACHINENAME']}.rb" if env['MACHINENAME']
 
       default_files.each do |file|
-        path = File.join(@config_path, file)
-        config.load path if File.exist? path
+        coordinator.config_file File.join(@config_path, file)
       end
-
     end
-    
+
   end
-  
+
 end
