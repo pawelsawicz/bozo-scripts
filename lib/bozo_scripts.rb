@@ -2,7 +2,8 @@ $:.push File.expand_path(File.dirname(__FILE__))
 
 require 'fileutils'
 require 'rainbow'
-require 'bozo/version'
+require 'bozo'
+
 require 'bozo/compilers/msbuild'
 require 'bozo/dependency_resolvers/nuget'
 require 'bozo/hooks/common_assembly_info'
@@ -15,3 +16,6 @@ require 'bozo/hooks/timing'
 require 'bozo/packagers/nuget'
 require 'bozo/publishers/file_copy'
 require 'bozo/test_runners/nunit'
+require 'bozo/configuration'
+require 'bozo/erubis_templating_coordinator'
+require 'bozo/version'
