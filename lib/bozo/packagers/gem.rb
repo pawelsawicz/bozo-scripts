@@ -1,3 +1,6 @@
+require 'rubygems'
+require 'rubygems/package_task'
+
 module Bozo::Packagers
 
   # Specifies gem packager.
@@ -15,13 +18,10 @@ module Bozo::Packagers
       }
 
       Dir.chdir(dist_dir) do
-        gemspecs.each do |spec|
-          args = []
-          args << 'gem'
-          args << 'build'
-          args << spec
+        gemspecs.each do |spec_file|
+          spec = eval(File.read(spec_file))
 
-          execute_command :gem, args
+          Gem::PackageTask.new(spec)
         end
       end
     end
