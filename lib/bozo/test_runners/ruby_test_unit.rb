@@ -14,19 +14,22 @@ module Bozo::TestRunners
 
     def execute
       test_files = []
-      
+
       @paths.each do |p|
-        Dir[p].each { |file|
-          test_files << file if (File.extname file) == '.rb'
-        }
+        Dir[p].select {|f| (File.extname f) == '.rb'}.each {|f| test_files << f}
       end
 
-      success = true
-      success = Test::Unit::AutoRunner.run(true, nil, test_files) if test_files.any?
+      return unless test_files.any?
 
-      raise "Failed running tests" unless success
+      raise Bozo::ExecutionError.new(:test_unit, test_files, -1) unless execute_tests test_files
     end
-    
+
+    private
+
+    def execute_tests(test_files)
+      Test::Unit::AutoRunner.run(true, nil, test_files)
+    end
+
   end
 
 end
