@@ -2,7 +2,7 @@ require 'test/unit'
 
 module Bozo::TestRunners
 
-  class RubyTestUnit
+  class Runit
 
     def initialize
       @paths = []
@@ -21,7 +21,7 @@ module Bozo::TestRunners
 
       return unless test_files.any?
 
-      raise Bozo::ExecutionError.new(:test_unit, test_files, -1) unless execute_tests test_files
+      raise Bozo::ExecutionError.new(:runit, test_files, -1) unless execute_tests test_files
     end
 
     private
