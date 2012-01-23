@@ -50,7 +50,7 @@ module Bozo::Hooks
 
     # Runs the post_compile hook
     def post_compile
-      config = configuration
+      config = config_with_defaults
 
       raise no_executable_path_specified if path.nil?
       raise no_executable_exists unless File.exists?(path)
@@ -63,10 +63,6 @@ module Bozo::Hooks
     end
 
     private
-
-    def configuration
-      config_with_defaults
-    end
 
     def config_with_defaults
       @@defaults.merge @config
