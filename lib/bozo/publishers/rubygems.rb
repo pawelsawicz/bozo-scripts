@@ -4,7 +4,7 @@ module Bozo::Publishers
   class RubyGems
 
     def execute
-      Dir['dist\gem\*.gem'].each { |gem| push gem }
+      Dir['dist/gem/*.gem'].each { |gem| push gem }
     end
 
     private
