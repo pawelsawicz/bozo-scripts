@@ -1,6 +1,14 @@
 module Bozo::Hooks
 
   class CommonAssemblyInfo
+
+    def initialize
+      @company_name = 'Zopa'
+    end
+
+    def company_name(name)
+      @company_name = name
+    end
     
     def pre_compile
       log_info 'Generating common assembly info'
@@ -18,7 +26,7 @@ module Bozo::Hooks
       File.open(path, 'w+') do |f|
         f << "using System.Reflection;\n"
         f << "\n"
-        f << "[assembly: AssemblyCompany(\"Zopa\")]\n"
+        f << "[assembly: AssemblyCompany(\"#{@company_name}\")]\n"
         f << "[assembly: AssemblyVersion(\"#{version}\")]\n"
         f << "[assembly: AssemblyFileVersion(\"#{version}\")]\n"
         f << "[assembly: AssemblyTrademark(\"#{trademark}\")]"
