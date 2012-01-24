@@ -7,9 +7,9 @@ module Bozo::Packagers
     def initialize
       @libraries = []
       @executables = []
-      @author = ''
-      @license_url = ''
-      @project_url = ''
+      @author = nil
+      @license_url = nil
+      @project_url = nil
     end
     
     def destination(destination)
