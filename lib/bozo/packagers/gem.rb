@@ -10,9 +10,7 @@ module Bozo::Packagers
       FileUtils.mkdir_p dist_dir
 
       gemspecs = []
-      Dir['*.gemspec'].each { |file|
-        gemspecs << File.expand_path(file)
-      }
+      Dir['*.gemspec'].each { |file| gemspecs << File.expand_path(file) }
 
       gemspecs.each do |spec|
         args = []
@@ -23,9 +21,7 @@ module Bozo::Packagers
         execute_command :gem, args
       end
 
-      Dir['*.gem'].each { |file|
-        FileUtils.mv file, File.join(dist_dir, file)
-      }
+      Dir['*.gem'].each { |file| FileUtils.mv file, File.join(dist_dir, file) }
     end
 
   end
