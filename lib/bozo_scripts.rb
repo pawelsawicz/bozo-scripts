@@ -5,6 +5,7 @@ require 'rainbow'
 require 'bozo'
 
 require 'bozo/compilers/msbuild'
+require 'bozo/dependency_resolvers/bundler'
 require 'bozo/dependency_resolvers/nuget'
 require 'bozo/hooks/common_assembly_info'
 require 'bozo/hooks/file_templating'

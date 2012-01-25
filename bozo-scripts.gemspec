@@ -5,8 +5,8 @@ require "bozo/version"
 Gem::Specification.new do |s|
   s.name        = "bozo-scripts"
   s.version     = BozoScripts::VERSION
-  s.authors     = ["Garry Shutler"]
-  s.email       = ["garryshutler@zopa.com"]
+  s.authors     = ["Garry Shutler", "Luke Smith"]
+  s.email       = ["garryshutler@zopa.com", "luke@zopa.com"]
   s.homepage    = ""
   s.summary     = "Zopa build system scripts"
   s.description = "Zopa build system scripts"

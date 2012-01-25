@@ -24,6 +24,18 @@ module Bozo::Packagers
     def required_tools
       :nuget
     end
+
+    def project_url(url)
+      @project_url = url
+    end
+
+    def license_url(url)
+      @license_url = url
+    end
+
+    def author(author)
+      @author = author
+    end
     
     def to_s
       "Publish projects with nuget #{@libraries | @executables} to #{@destination}"
@@ -57,10 +69,10 @@ module Bozo::Packagers
           doc.metadata do
             doc.id project
             doc.version_ package_version
-            doc.authors 'Zopa'
+            doc.authors @author
             doc.description project
-            doc.projectUrl 'http://www.zopa.com'
-            doc.licenseUrl 'http://www.zopa.com'
+            doc.projectUrl @project_url
+            doc.licenseUrl @license_url
           end
           doc.files do
             yield doc            
