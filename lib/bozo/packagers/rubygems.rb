@@ -16,7 +16,7 @@ module Bozo::Packagers
     private
 
     def build_gem(spec)
-      execute_command :gem, ['gem', 'build', spec]
+      execute_command :rubygems, ['gem', 'build', spec]
     end
 
   end

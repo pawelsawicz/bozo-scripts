@@ -10,7 +10,7 @@ module Bozo::Publishers
     private
 
     def push(gem)
-      execute_command :gem, ['gem', 'push', gem]
+      execute_command :rubygems, ['gem', 'push', gem]
     end
 
   end
