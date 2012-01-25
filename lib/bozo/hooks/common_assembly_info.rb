@@ -2,10 +2,6 @@ module Bozo::Hooks
 
   class CommonAssemblyInfo
 
-    def initialize
-      @company_name = 'Zopa'
-    end
-
     def company_name(name)
       @company_name = name
     end
