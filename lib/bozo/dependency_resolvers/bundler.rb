@@ -20,8 +20,13 @@ module Bozo::DependencyResolvers
     #
     # @param [Boolean] pre
     #     Whether the pre version of the Bundler gem should be installed.
-    #     Defaults to <tt>false</tt> if not specified.
-    def use_pre(pre)
+    #
+    #     The pre version of Bundler will not be used unless explicitly
+    #     requested.
+    #
+    #     Calling the method without any arguments will request that the pre
+    #     version should be used.
+    def use_pre(pre = true)
       @pre = pre
     end
 
