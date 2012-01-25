@@ -1,11 +1,10 @@
 require 'bozo_scripts'
 
-version '0.1.0'
+package_with :rubygems
 
-test_with :runit do |n|
-  n.path 'test/**'
-end
+resolve_dependencies_with :bundler
 
-package_with :gem
+post_publish :git_tag_release
 
 with_hook :teamcity
+with_hook :git_commit_hashes
