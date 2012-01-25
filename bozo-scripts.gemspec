@@ -7,9 +7,12 @@ Gem::Specification.new do |s|
   s.version     = BozoScripts::VERSION
   s.authors     = ["Garry Shutler", "Luke Smith"]
   s.email       = ["garryshutler@zopa.com", "luke@zopa.com"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/zopaUK/bozo-scripts"
+  s.platform    = Gem::Platform::RUBY
   s.summary     = "Zopa build system scripts"
   s.description = "Zopa build system scripts"
+
+  s.rubyforge_project = "bozo-scripts"
 
   s.files         = `git ls-files -- {*/**/*,VERSION}`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -19,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "nokogiri"
   s.add_runtime_dependency "erubis"
   s.add_runtime_dependency "test-unit"
+  s.add_runtime_dependency "bozo"
 end
