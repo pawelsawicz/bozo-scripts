@@ -3,7 +3,7 @@ module Bozo::Packagers
   # Specifies gem packager.
   #
   # Builds any '*.gemspec' file in the root directory
-  class Gem
+  class Rubygems
 
     def execute
       dist_dir = File.expand_path(File.join('dist', 'gem'))
@@ -16,7 +16,7 @@ module Bozo::Packagers
     private
 
     def build_gem(spec)
-      execute_command :gem, ['gem', 'build', spec]
+      execute_command :rubygems, ['gem', 'build', spec]
     end
 
   end
