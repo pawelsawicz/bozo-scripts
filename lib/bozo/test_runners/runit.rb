@@ -1,5 +1,3 @@
-require 'test/unit'
-
 module Bozo::TestRunners
 
   class Runit
@@ -13,6 +11,8 @@ module Bozo::TestRunners
     end
 
     def execute
+      require 'test/unit'
+      
       test_files = []
 
       @paths.each do |p|
