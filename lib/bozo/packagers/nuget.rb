@@ -14,7 +14,7 @@ module Bozo::Packagers
     end
     
     def library(project)
-      @libraries << project
+      @libraries << NugetLibrary.new(project)
     end
 
     def executable(project)
@@ -42,27 +42,28 @@ module Bozo::Packagers
     end
     
     def execute
-      @libraries.each {|project| package_library project}
+      @libraries.each {|project| package_library project }
       @executables.each {|project| package_executable project}
     end
 
     private
-    
+
     def package_library(project)
-      spec_path = generate_specification(project) do |doc|
-        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'lib')
+      dependencies = project.dependencies
+      spec_path = generate_specification(project.name, dependencies) do |doc|
+        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project.name, '**', "#{project.name}.dll")).gsub(/\//, '\\'), :target => 'lib')
       end
-      create_package(project, spec_path)
+      create_package(project.name, spec_path, true)
     end
 
     def package_executable(project)
-      spec_path = generate_specification(project) do |doc|
+      spec_path = generate_specification(project, []) do |doc|
         doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe')
       end
       create_package(project, spec_path, true)
     end
     
-    def generate_specification(project)
+    def generate_specification(project, dependencies)
       log_debug "Generating specification for #{project}"
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
@@ -73,6 +74,11 @@ module Bozo::Packagers
             doc.description project
             doc.projectUrl @project_url
             doc.licenseUrl @license_url
+            doc.dependencies do
+              dependencies.each do |dep|
+                doc.dependency(:id => dep[:id], :version => dep[:version])
+              end
+            end
           end
           doc.files do
             yield doc            
@@ -116,6 +122,51 @@ module Bozo::Packagers
       execute_command :nuget, args
     end
     
+  end
+
+  private
+
+  class NugetLibrary
+
+    def initialize(project)
+      @name = project
+    end
+
+    def name
+      @name
+    end
+
+    def dependencies
+      nuget_dependencies + project_reference_dependencies
+    end
+
+    private
+
+    def project_reference_dependencies
+      # TODO: need to include any project references, only including existing nuget dependencies
+      []
+    end
+
+    # get dependencies from packages.config
+    def nuget_dependencies
+      package_file = packages_file
+      return [] unless File.exist? package_file
+
+      doc = Nokogiri::XML(File.open(package_file))
+
+      dependencies = []
+      doc.xpath('//packages/package').each do |node|
+        dependencies << {:id => node[:id], :version => node[:version]}
+      end
+
+      dependencies
+    end
+
+    def packages_file
+      # TODO: need to include the '**' to search through all directories
+      File.expand_path(File.join('src', 'csharp', @name, 'packages.config'))
+    end
+
   end
   
 end
