@@ -14,11 +14,11 @@ module Bozo::Packagers
     end
     
     def library(project)
-      @libraries << NugetLibrary.new(project)
+      @libraries << NugetLibraryPackage.new(project)
     end
 
     def executable(project)
-      @executables << project
+      @executables << NugetExecutablePackage.new(project)
     end
     
     def required_tools
@@ -42,28 +42,20 @@ module Bozo::Packagers
     end
     
     def execute
-      @libraries.each {|project| package_library project }
-      @executables.each {|project| package_executable project}
+      @libraries.each {|project| package project }
+      @executables.each {|project| package project}
     end
 
     private
 
-    def package_library(project)
+    def package(project)
       dependencies = project.dependencies
-      spec_path = generate_specification(project.name, dependencies) do |doc|
-        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project.name, '**', "#{project.name}.dll")).gsub(/\//, '\\'), :target => 'lib')
-      end
+      files = project.files
+      spec_path = generate_specification(project.name, dependencies, files)
       create_package(project.name, spec_path, true)
     end
-
-    def package_executable(project)
-      spec_path = generate_specification(project, []) do |doc|
-        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe')
-      end
-      create_package(project, spec_path, true)
-    end
     
-    def generate_specification(project, dependencies)
+    def generate_specification(project, dependencies, files)
       log_debug "Generating specification for #{project}"
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
@@ -81,7 +73,9 @@ module Bozo::Packagers
             end
           end
           doc.files do
-            yield doc            
+            files.each do |file|
+              doc.file(file)
+            end
           end
         end
       end
@@ -126,7 +120,29 @@ module Bozo::Packagers
 
   private
 
-  class NugetLibrary
+  class NugetExecutablePackage
+
+    def initialize(project)
+      @name = project
+    end
+
+    def name
+      @name
+    end
+
+    def dependencies
+      []
+    end
+
+    def files
+      files = []
+      files << {:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe'}
+      files
+    end
+
+  end
+
+  class NugetLibraryPackage
 
     def initialize(project)
       @name = project
@@ -138,6 +154,12 @@ module Bozo::Packagers
 
     def dependencies
       nuget_dependencies + project_reference_dependencies
+    end
+
+    def files
+      files = []
+      files << { :src => File.expand_path(File.join('temp', 'msbuild', @name, '**', "#{@name}.dll")).gsub(/\//, '\\'), :target => 'lib' }
+      files
     end
 
     private
