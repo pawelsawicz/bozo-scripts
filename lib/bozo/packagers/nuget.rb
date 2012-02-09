@@ -42,7 +42,7 @@ module Bozo::Packagers
     end
     
     def execute
-      @libraries.each {|project| package project }
+      @libraries.each {|project| package project}
       @executables.each {|project| package project}
     end
 
@@ -68,7 +68,7 @@ module Bozo::Packagers
             doc.licenseUrl @license_url
             doc.dependencies do
               dependencies.each do |dep|
-                doc.dependency(:id => dep[:id], :version => dep[:version])
+                doc.dependency(dep)
               end
             end
           end
