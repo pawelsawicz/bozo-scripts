@@ -153,7 +153,7 @@ module Bozo::Packagers
     end
 
     def dependencies
-      nuget_dependencies + project_reference_dependencies
+      project_reference_dependencies + nuget_dependencies
     end
 
     def files
@@ -165,8 +165,14 @@ module Bozo::Packagers
     private
 
     def project_reference_dependencies
-      # TODO: need to include any project references, only including existing nuget dependencies
-      []
+      doc = Nokogiri::XML(File.open(project_file))
+
+      dependencies = []
+      doc.xpath('//proj:Project/proj:ItemGroup/proj:ProjectReference/proj:Name', {"proj" => "http://schemas.microsoft.com/developer/msbuild/2003"}).each do |node|
+        dependencies << {:id => node.text}
+      end
+      
+      dependencies
     end
 
     # get dependencies from packages.config
@@ -187,6 +193,10 @@ module Bozo::Packagers
     def packages_file
       # TODO: need to include the '**' to search through all directories
       File.expand_path(File.join('src', 'csharp', @name, 'packages.config'))
+    end
+
+    def project_file
+      File.expand_path(File.join('src', 'csharp', @name, "#{@name}.csproj"))
     end
 
   end
