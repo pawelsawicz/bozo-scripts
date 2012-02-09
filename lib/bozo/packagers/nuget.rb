@@ -49,37 +49,35 @@ module Bozo::Packagers
     private
 
     def package(project)
-      dependencies = project.dependencies
-      files = project.files
-      spec_path = generate_specification(project.name, dependencies, files)
+      spec_path = generate_specification(project)
       create_package(project.name, spec_path, true)
     end
     
-    def generate_specification(project, dependencies, files)
-      log_debug "Generating specification for #{project}"
+    def generate_specification(project)
+      log_debug "Generating specification for #{project.name}"
       builder = Nokogiri::XML::Builder.new do |doc|
         doc.package(:xmlns => "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd") do
           doc.metadata do
-            doc.id project
+            doc.id project.name
             doc.version_ package_version
             doc.authors @author
-            doc.description project
+            doc.description project.name
             doc.projectUrl @project_url
             doc.licenseUrl @license_url
             doc.dependencies do
-              dependencies.each do |dep|
+              project.dependencies.each do |dep|
                 doc.dependency(dep)
               end
             end
           end
           doc.files do
-            files.each do |file|
+            project.files.each do |file|
               doc.file(file)
             end
           end
         end
       end
-      spec_path = File.expand_path(File.join('temp', 'nuget', "#{project}.nuspec"))
+      spec_path = File.expand_path(File.join('temp', 'nuget', "#{project.name}.nuspec"))
       FileUtils.mkdir_p File.dirname(spec_path)
       File.open(spec_path, 'w+') {|f| f.write(builder.to_xml)}
       spec_path
@@ -191,7 +189,6 @@ module Bozo::Packagers
     end
 
     def packages_file
-      # TODO: need to include the '**' to search through all directories
       File.expand_path(File.join('src', 'csharp', @name, 'packages.config'))
     end
 
