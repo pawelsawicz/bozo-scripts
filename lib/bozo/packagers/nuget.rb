@@ -14,13 +14,13 @@ module Bozo::Packagers
     end
     
     def library(project)
-      @libraries << NugetLibraryPackage.new(project)
+      @libraries << LibraryPackage.new(project, self)
     end
 
     def executable(project)
-      @executables << NugetExecutablePackage.new(project)
+      @executables << ExecutablePackage.new(project)
     end
-    
+
     def required_tools
       :nuget
     end
@@ -44,6 +44,17 @@ module Bozo::Packagers
     def execute
       @libraries.each {|project| package project}
       @executables.each {|project| package project}
+    end
+
+    # Returns the version that the package should be given.
+    def package_version
+      # If running on a build server then it is a real release, otherwise it is
+      # a preview release and the version should reflect that.
+      if build_server?
+        version
+      else
+        "#{version}-pre#{env['GIT_HASH']}"
+      end
     end
 
     private
@@ -82,17 +93,6 @@ module Bozo::Packagers
       File.open(spec_path, 'w+') {|f| f.write(builder.to_xml)}
       spec_path
     end
-
-    # Returns the version that the package should be given.
-    def package_version
-      # If running on a build server then it is a real release, otherwise it is
-      # a preview release and the version should reflect that.
-      if build_server?
-        version
-      else
-        "#{version}-pre#{env['GIT_HASH']}"
-      end
-    end
     
     def create_package(project, spec_path, omit_analysis = false)
       args = []
@@ -118,7 +118,7 @@ module Bozo::Packagers
 
   private
 
-  class NugetExecutablePackage
+  class ExecutablePackage
 
     def initialize(project)
       @name = project
@@ -133,17 +133,16 @@ module Bozo::Packagers
     end
 
     def files
-      files = []
-      files << {:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe'}
-      files
+      [{:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe'}]
     end
 
   end
 
-  class NugetLibraryPackage
+  class LibraryPackage
 
-    def initialize(project)
+    def initialize(project, nuget)
       @name = project
+      @nuget = nuget
     end
 
     def name
@@ -155,9 +154,7 @@ module Bozo::Packagers
     end
 
     def files
-      files = []
-      files << { :src => File.expand_path(File.join('temp', 'msbuild', @name, '**', "#{@name}.dll")).gsub(/\//, '\\'), :target => 'lib' }
-      files
+      [{:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', "#{@name}.dll")).gsub(/\//, '\\'), :target => 'lib'}]
     end
 
     private
@@ -165,12 +162,9 @@ module Bozo::Packagers
     def project_reference_dependencies
       doc = Nokogiri::XML(File.open(project_file))
 
-      dependencies = []
-      doc.xpath('//proj:Project/proj:ItemGroup/proj:ProjectReference/proj:Name', {"proj" => "http://schemas.microsoft.com/developer/msbuild/2003"}).each do |node|
-        dependencies << {:id => node.text}
+      doc.xpath('//proj:Project/proj:ItemGroup/proj:ProjectReference/proj:Name', {"proj" => "http://schemas.microsoft.com/developer/msbuild/2003"}).map do |node|
+        {:id => node.text, :version => "[#{@nuget.package_version}]"}
       end
-      
-      dependencies
     end
 
     # get dependencies from packages.config
@@ -180,12 +174,9 @@ module Bozo::Packagers
 
       doc = Nokogiri::XML(File.open(package_file))
 
-      dependencies = []
-      doc.xpath('//packages/package').each do |node|
-        dependencies << {:id => node[:id], :version => node[:version]}
+      doc.xpath('//packages/package').map do |node|
+        {:id => node[:id], :version => node[:version]}
       end
-
-      dependencies
     end
 
     def packages_file
