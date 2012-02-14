@@ -7,6 +7,7 @@ module Bozo::Packagers
     def initialize
       @libraries = []
       @executables = []
+      @websites = []
     end
     
     def destination(destination)
@@ -19,6 +20,10 @@ module Bozo::Packagers
 
     def executable(project)
       @executables << project
+    end
+
+    def website(website)
+      @websites << website
     end
     
     def required_tools
@@ -44,6 +49,7 @@ module Bozo::Packagers
     def execute
       @libraries.each {|project| package_library project}
       @executables.each {|project| package_executable project}
+      @websites.each {|project| package_website project}
     end
 
     private
@@ -58,6 +64,13 @@ module Bozo::Packagers
     def package_executable(project)
       spec_path = generate_specification(project) do |doc|
         doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'exe')
+      end
+      create_package(project, spec_path, true)
+    end
+
+    def package_website(project)
+      spec_path = generate_specification(project) do |doc|
+        doc.file(:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'website')
       end
       create_package(project, spec_path, true)
     end
