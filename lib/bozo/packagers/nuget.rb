@@ -180,7 +180,9 @@ module Bozo::Packagers
     end
 
     def packages_file
-      File.expand_path(File.join('src', 'csharp', @name, 'packages.config'))
+      file = File.expand_path(File.join('src', 'csharp', @name, 'packages.config'))
+      file = File.expand_path(File.join('test', 'csharp', @name, 'packages.config')) unless File.exist? file
+      file
     end
 
     def project_file
