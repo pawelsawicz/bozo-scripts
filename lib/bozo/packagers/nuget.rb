@@ -180,14 +180,16 @@ module Bozo::Packagers
     end
 
     def packages_file
-      file = File.expand_path(File.join('src', 'csharp', @name, 'packages.config'))
-      file = File.expand_path(File.join('test', 'csharp', @name, 'packages.config')) unless File.exist? file
-      file
+      find_file_in_project 'packages.config'
     end
 
     def project_file
-      file = File.expand_path(File.join('src', 'csharp', @name, "#{@name}.csproj"))
-      file = File.expand_path(File.join('test', 'csharp', @name, "#{@name}.csproj")) unless File.exist? file
+      find_file_in_project "#{@name}.csproj"
+    end
+
+    def find_file_in_project(file_name)
+      file = File.expand_path(File.join('src', 'csharp', @name, file_name))
+      file = File.expand_path(File.join('test', 'csharp', @name, file_name)) unless File.exist? file
       file
     end
 
