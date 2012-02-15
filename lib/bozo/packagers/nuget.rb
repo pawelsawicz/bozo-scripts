@@ -186,7 +186,9 @@ module Bozo::Packagers
     end
 
     def project_file
-      File.expand_path(File.join('src', 'csharp', @name, "#{@name}.csproj"))
+      file = File.expand_path(File.join('src', 'csharp', @name, "#{@name}.csproj"))
+      file = File.expand_path(File.join('test', 'csharp', @name, "#{@name}.csproj")) unless File.exist? file
+      file
     end
 
   end
