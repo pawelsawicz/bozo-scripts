@@ -216,7 +216,7 @@ module Bozo::Packagers
     end
 
     def files
-      [{:src => File.expand_path(File.join('temp', 'msbuild', project, '**', '*.*')).gsub(/\//, '\\'), :target => 'website'}]
+      [{:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', '*.*')).gsub(/\//, '\\'), :target => 'website'}]
     end
 
   end
