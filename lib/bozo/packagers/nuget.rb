@@ -7,6 +7,7 @@ module Bozo::Packagers
     def initialize
       @libraries = []
       @executables = []
+      @websites = []
     end
     
     def destination(destination)
@@ -21,6 +22,10 @@ module Bozo::Packagers
       @executables << ExecutablePackage.new(project)
     end
 
+    def website(project)
+      @websites << WebsitePackage.new(project)
+    end
+    
     def required_tools
       :nuget
     end
@@ -38,12 +43,13 @@ module Bozo::Packagers
     end
     
     def to_s
-      "Publish projects with nuget #{@libraries | @executables} to #{@destination}"
+      "Publish projects with nuget #{@libraries | @executables | @websites} to #{@destination}"
     end
     
     def execute
       @libraries.each {|project| package project}
       @executables.each {|project| package project}
+      @websites.each {|project| package project}
     end
 
     # Returns the version that the package should be given.
@@ -191,6 +197,26 @@ module Bozo::Packagers
       file = File.expand_path(File.join('src', 'csharp', @name, file_name))
       file = File.expand_path(File.join('test', 'csharp', @name, file_name)) unless File.exist? file
       file
+    end
+
+  end
+
+  class WebsitePackage
+
+    def initialize(project)
+      @name = project
+    end
+
+    def name
+      @name
+    end
+
+    def dependencies
+      []
+    end
+
+    def files
+      [{:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', '*.*')).gsub(/\//, '\\'), :target => 'website'}]
     end
 
   end
