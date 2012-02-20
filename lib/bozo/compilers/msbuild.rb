@@ -91,26 +91,34 @@ module Bozo::Compilers
 
     # Creates a project based on the project_file type.
     # Defaults to a class library project if it cannot be determined.
+    # @return [Project]
     def create_project(project_file)
-      project_types = []
-
       project_name = File.basename(project_file).gsub(/\.csproj$/, '')
       log_debug project_name
 
-      File.open(project_file) do |f|
-        element = Nokogiri::XML(f).css('Project PropertyGroup ProjectTypeGuids').first
-        project_types = element.content.split(';').map {|e| e.downcase } unless element.nil?
-      end
-
-      web_app_type = '{349c5851-65df-11da-9384-00065b846f21}'
-      return WebProject.new(project_file, project_name) if project_types.include?(web_app_type)
-
-      ClassLibrary.new project_file, project_name
+      project_class_for(project_file).new project_file, project_name
     end
     
   end
 
   private
+
+  # @return [Class]
+  def project_class_for(project_file)
+    project_types = project_types_from project_file
+    web_app_type = '{349c5851-65df-11da-9384-00065b846f21}'
+    project_types.include?(web_app_type) ? WebProject : ClassLibrary
+  end
+
+  # @return [Array]
+  def project_types_from(project_file)
+    File.open(project_file) do |f|
+      element = Nokogiri::XML(f).css('Project PropertyGroup ProjectTypeGuids').first
+      project_types = element.content.split(';').map {|e| e.downcase } unless element.nil?
+    end
+
+    project_types
+  end
 
   class Project
 
@@ -147,7 +155,6 @@ module Bozo::Compilers
       end
 
       args << "\"#{@project_file}\""
-      args
     end
 
   end
