@@ -108,6 +108,8 @@ module Bozo::Compilers
 
     # @return [Array]
     def project_types_from(project_file)
+      project_types = []
+
       File.open(project_file) do |f|
         element = Nokogiri::XML(f).css('Project PropertyGroup ProjectTypeGuids').first
         project_types = element.content.split(';').map {|e| e.downcase } unless element.nil?
