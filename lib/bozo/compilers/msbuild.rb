@@ -98,27 +98,27 @@ module Bozo::Compilers
 
       project_class_for(project_file).new project_file, project_name
     end
+
+    # @return [Class]
+    def project_class_for(project_file)
+      project_types = project_types_from project_file
+      web_app_type = '{349c5851-65df-11da-9384-00065b846f21}'
+      project_types.include?(web_app_type) ? WebProject : ClassLibrary
+    end
+
+    # @return [Array]
+    def project_types_from(project_file)
+      File.open(project_file) do |f|
+        element = Nokogiri::XML(f).css('Project PropertyGroup ProjectTypeGuids').first
+        project_types = element.content.split(';').map {|e| e.downcase } unless element.nil?
+      end
+
+      project_types
+    end
     
   end
 
   private
-
-  # @return [Class]
-  def project_class_for(project_file)
-    project_types = project_types_from project_file
-    web_app_type = '{349c5851-65df-11da-9384-00065b846f21}'
-    project_types.include?(web_app_type) ? WebProject : ClassLibrary
-  end
-
-  # @return [Array]
-  def project_types_from(project_file)
-    File.open(project_file) do |f|
-      element = Nokogiri::XML(f).css('Project PropertyGroup ProjectTypeGuids').first
-      project_types = element.content.split(';').map {|e| e.downcase } unless element.nil?
-    end
-
-    project_types
-  end
 
   class Project
 
