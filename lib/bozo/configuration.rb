@@ -30,6 +30,13 @@ module Bozo
       @group_stack.last.set_value(key, value)
     end
 
+    # Returns the configuration value for the key
+    #
+    # @param [Symbol] key
+    def [](key)
+      @root[key]
+    end
+
     # Load the specified file as an additional configuration file.
     #
     # == Usage
@@ -87,6 +94,13 @@ module Bozo
       def method_missing(sym, *args, &block)
         raise missing_child sym unless @hash.key? sym
         @hash[sym]
+      end
+
+      # Returns the configuration value for the key
+      #
+      # @param [Symbol] key
+      def [](key)
+        @hash[key]
       end
 
       # Ensures the hash contains a child hash for the specified key and
