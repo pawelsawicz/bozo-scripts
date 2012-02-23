@@ -9,14 +9,24 @@ module Bozo::Hooks
   # configuration.
   class FxCop
 
-    @@defaults = {
-      :types => [],
-      :framework_versions => [:net35, :net40],
-      :project => nil,
-      :path => File.join(ENV['ProgramFiles(x86)'], 'Microsoft Fxcop 10.0', 'fxcopcmd.exe')
-    }
+    def self.default_path
+      if ENV['ProgramFiles(x86)'].nil?
+        program_files_path = ENV['ProgramFiles']
+      else
+        program_files_path = ENV['ProgramFiles(x86)']
+      end
+
+      File.join(program_files_path, 'Microsoft Fxcop 10.0', 'fxcopcmd.exe') unless program_files_path.nil?
+    end
 
     def initialize
+      @@defaults = {
+        :types => [],
+        :framework_versions => [:net35, :net40],
+        :project => nil,
+        :path => FxCop.default_path
+      }
+
       @config = {}
     end
 
@@ -32,13 +42,18 @@ module Bozo::Hooks
     end
 
     # Specifies the fxcop path
-    def path(path)
-      @config[:path] = path
+    def path(path = nil)
+      @config[:path] = path unless path.nil?
+      
+      @config[:path]
     end
 
     # Runs the post_compile hook
     def post_compile
-      config = configuration
+      config = config_with_defaults
+
+      raise no_executable_path_specified if path.nil?
+      raise no_executable_exists unless File.exists?(path)
 
       if config[:project].nil?
         execute_projects config
@@ -48,10 +63,6 @@ module Bozo::Hooks
     end
 
     private
-
-    def configuration
-      config_with_defaults
-    end
 
     def config_with_defaults
       @@defaults.merge @config
@@ -69,9 +80,11 @@ module Bozo::Hooks
     # @param [Hash] config
     #     The fxcop configuration
     def execute_projects(config)
+      log_debug "Executing projects with '#{path}'" if config[:framework_versions].any?
+
       config[:framework_versions].each do |framework_version|
         args = []
-        args << '"' + config[:path] + '"'
+        args << '"' + path + '"'
         args << "/out:#{output_path}\\#{Time.now.to_i}-#{framework_version}-FxCop-report.xml"
         args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
@@ -93,13 +106,27 @@ module Bozo::Hooks
     # @param [Hash] config
     #     The fxcop configuration
     def execute_fxcop_project(config)
+      log_debug "Executing fxcop project '#{config[:project]}' with '#{path}'"
+
       args = []
-      args << '"' + config[:path] + '"'
+      args << '"' + path + '"'
       args << "/out:\"#{output_path}\\#{File.basename(config[:project], '.*')}-FxCop-report.xml\""
       args << "/project:\"#{config[:project]}\""
       args << "/types:" + config[:types].join(',') unless config[:types].empty?
 
       execute_command :fx_cop, args
+    end
+
+    # Create a new error specifying that the executable path
+    # has not been specified.
+    def no_executable_path_specified
+      ConfigurationError.new "No path specified for fxcop"
+    end
+
+    # Create a new error specifying that the fxcop executable
+    # does not exist at the path.
+    def no_executable_exists
+      ConfigurationError.new "FxCop executable does not exist at #{path}"
     end
 
     # List of compiled assemblies and executables
