@@ -11,8 +11,6 @@ module Bozo::TestRunners
   class DotCover
     def self.default_path
       if ENV['teamcity.dotCover.home'].nil?
-        log_debug 'Using dotcover from default installation directory'
-
         if ENV['ProgramFiles(x86)'].nil?
           program_files_path = ENV['ProgramFiles']
         else
@@ -21,7 +19,6 @@ module Bozo::TestRunners
 
         File.join(program_files_path, 'JetBrains', 'dotCover', 'v1.2', 'Bin', 'dotcover.exe')
       else
-        log_debug 'Using dotcover from teamcity.dotCover.home environment variable'
         File.join(ENV['teamcity.dotCover.home'], 'dotcover.exe')
       end
     end
@@ -90,6 +87,16 @@ module Bozo::TestRunners
       instance.extend Bozo::Runner
       @runners << instance
       block.call instance if block
+    end
+
+    # Converts a symbol into a Pascal Case class name.
+    #
+    # eg. `:single` => `"Single"`, `:two_words` => `"TwoWords"`.
+    #
+    # @param [Symbol] type
+    #     The name of a step executor.
+    def to_class_name(type)
+      type.to_s.split('_').map{|word| word.capitalize}.join
     end
 
     def execute_without_coverage(runner)
