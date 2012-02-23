@@ -5,3 +5,5 @@ Gemfile.lock
 pkg/*
 scratch
 build
+.DS_Store
+dist/
