@@ -21,9 +21,8 @@ module Bozo::Hooks
     def post_test
       return unless Teamcity.hosted_in_teamcity?
 
-      # only supporting nunit at present
-      report_path = File.expand_path(File.join(Dir.pwd, "/temp/nunit/nunit-report.xml"))
-      puts "##teamcity[importData type='nunit' path='#{report_path}']" if File.exist? report_path
+      report
+      report_dotnetcoverage
 
       log_post_step :test
     end
@@ -40,6 +39,39 @@ module Bozo::Hooks
       method.to_s =~ /^(pre|post)_(.+)/ or super
     end
 
+    # Returns whether teamcity is hosting bozo
+    def self.hosted_in_teamcity?
+      not ENV['TEAMCITY_VERSION'].nil?
+    end
+
+    private
+
+    # Notifies teamcity of general reports such as test runner results
+    def report
+      report_types = [:nunit, :fxcop]
+      report_types.each do |type|
+        reports = report_files(File.join(Dir.pwd, "/temp"), type)
+
+        reports.each do |report|
+          puts "##teamcity[importData type='#{type}' path='#{report}']"
+        end
+      end
+    end
+
+    # Notifies teamcity of dotNetCoverage results
+    def report_dotnetcoverage
+      tool_types = [:dot_cover]
+      
+      tool_types.each do |type|
+        reports = report_files(File.join(Dir.pwd, "/temp"), type)
+
+        reports.each do |report|
+          tool_name = Bozo::Configuration.to_class_name(type).downcase
+          puts "##teamcity[importData type='dotNetCoverage' tool='#{tool_name}' path='#{report}']"
+        end
+      end
+    end
+
     def log_pre_step(step)
       puts "##teamcity[progressStart 'Pre #{step}']" if Teamcity.hosted_in_teamcity?
     end
@@ -48,8 +80,9 @@ module Bozo::Hooks
       puts "##teamcity[progressEnd 'Post #{step}']" if Teamcity.hosted_in_teamcity?
     end
 
-    def self.hosted_in_teamcity?
-      ENV['TEAMCITY_VERSION'] != nil
+    def report_files(path, type)
+      files = File.expand_path(File.join(path, "/**/*-#{Bozo::Configuration.to_class_name(type)}-report.xml"))
+      Dir[files]
     end
 
   end
