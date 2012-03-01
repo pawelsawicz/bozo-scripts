@@ -21,6 +21,7 @@ module Bozo::Compilers
   
     def initialize
       @config = {}
+      @exclude_projects = []
     end
   
     def version(version)
@@ -41,7 +42,6 @@ module Bozo::Compilers
     end
 
     def exclude_project(project_name)
-      @exclude_projects ||= []
       @exclude_projects << project_name
     end
 
