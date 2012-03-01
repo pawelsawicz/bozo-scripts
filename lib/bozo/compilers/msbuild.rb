@@ -40,6 +40,11 @@ module Bozo::Compilers
       @config[:properties] = @config[:properties].merge(args)          
     end
 
+    def exclude_project(project_name)
+      @exclude_projects ||= []
+      @exclude_projects << project_name
+    end
+
     # Assign how many cores should be used by msbuild
     #
     # @param [Integer] cores
@@ -80,7 +85,7 @@ module Bozo::Compilers
     
     def project_files(directory)
       project_file_matcher = File.expand_path(File.join(directory, 'csharp', '**', '*.csproj'))
-      Dir[project_file_matcher]
+      Dir[project_file_matcher].select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
     end
     
     def required_tools
