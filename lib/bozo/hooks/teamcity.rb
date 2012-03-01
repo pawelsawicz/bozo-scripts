@@ -2,6 +2,8 @@ module Bozo::Hooks
 
   class Teamcity
 
+    include Bozo::ClassNameHelpers
+
     def pre_compile
       return unless Teamcity.hosted_in_teamcity?
       log_pre_step :compile
@@ -66,7 +68,7 @@ module Bozo::Hooks
         reports = report_files(File.join(Dir.pwd, "/temp"), type)
 
         reports.each do |report|
-          tool_name = Bozo::Configuration.to_class_name(type).downcase
+          tool_name = to_class_name(type).downcase
           puts "##teamcity[importData type='dotNetCoverage' tool='#{tool_name}' path='#{report}']"
         end
       end
@@ -81,7 +83,7 @@ module Bozo::Hooks
     end
 
     def report_files(path, type)
-      files = File.expand_path(File.join(path, "/**/*-#{Bozo::Configuration.to_class_name(type)}-report.xml"))
+      files = File.expand_path(File.join(path, "/**/*-#{to_class_name(type)}-report.xml"))
       Dir[files]
     end
 
