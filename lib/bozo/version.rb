@@ -1,5 +1,5 @@
 module BozoScripts
 
-  VERSION = '0.1.0'
+  VERSION = File.read(File.expand_path(File.dirname(File.realpath(__FILE__)) + '/../../VERSION')).strip
   
 end

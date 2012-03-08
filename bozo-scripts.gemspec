@@ -5,19 +5,24 @@ require "bozo/version"
 Gem::Specification.new do |s|
   s.name        = "bozo-scripts"
   s.version     = BozoScripts::VERSION
-  s.authors     = ["Garry Shutler"]
-  s.email       = ["garryshutler@zopa.com"]
-  s.homepage    = ""
+  s.authors     = ["Garry Shutler", "Luke Smith"]
+  s.email       = ["garryshutler@zopa.com", "luke@zopa.com"]
+  s.homepage    = "https://github.com/zopaUK/bozo-scripts"
+  s.platform    = Gem::Platform::RUBY
   s.summary     = "Zopa build system scripts"
   s.description = "Zopa build system scripts"
 
-  s.files         = `git ls-files`.split("\n")
+  s.rubyforge_project = "bozo-scripts"
+
+  s.files         = `git ls-files -- {*/**/*,VERSION,LICENSE}`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency "nokogiri"
   s.add_runtime_dependency "erubis"
+  s.add_runtime_dependency "test-unit"
+  s.add_runtime_dependency "bozo"
   s.add_runtime_dependency "uglifier"
   s.add_runtime_dependency "yui-compressor"
 end
