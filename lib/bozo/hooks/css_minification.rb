@@ -8,20 +8,15 @@ module Bozo::Hooks
     def initialize
       super
       exclude "**/*.min.css"
+      @compressor = YUI::CssCompressor.new
     end
 
-    def pre_package
-      compressor = YUI::CssCompressor.new
+    def file_extension
+      :css
+    end
 
-      files = get_files(:css)
-      exclude = get_exclusion_files()
-
-      files.each do |f|
-        css = File.read(f)
-        minified = compressor.compress css unless exclude.include?(f)
-        minified = css if exclude.include?(f)
-        File.open(output_filename(f), 'w') {|t| t.write(minified) }
-      end
+    def minify(css)
+      @compressor.compress css
     end
 
   end

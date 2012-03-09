@@ -27,6 +27,27 @@ module Bozo::Hooks
       @include_min_extension = true
     end
 
+    def pre_package
+      files = get_files(file_extension)
+      exclude = get_exclusion_files()
+
+      files.each do |f|
+        content = File.read(f)
+        content = minify content unless exclude.include? f
+
+        File.open(output_filename(f), 'w') { |t| t.write(content) }
+      end
+    end
+
+    protected
+
+    # Minifies the content
+    #
+    # @param content[String]
+    def minify(content)
+      content
+    end
+
     private
 
     # gets all the files of the specified type
@@ -53,8 +74,7 @@ module Bozo::Hooks
       output_path = File.join(File.dirname(original_path), File.basename(original_path, '.*'))
       output_path = "#{output_path}-#{version}" if @include_version
       output_path = "#{output_path}.min" if @include_min_extension
-      output_path = "#{output_path}#{File.extname(original_path)}"
-      output_path
+      "#{output_path}#{File.extname(original_path)}"
     end
 
   end
