@@ -102,7 +102,7 @@ module Bozo::Hooks
     def pre_compile
       log_info '' # formatting
       log_info 'Generating files'
-      
+
       get_coordinator.generate_files do |template, target|
         log_debug "Generating #{target} from #{template}"
       end

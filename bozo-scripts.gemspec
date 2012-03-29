@@ -24,5 +24,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "test-unit"
   s.add_runtime_dependency "bozo"
   s.add_runtime_dependency "uglifier"
-  s.add_runtime_dependency "yui-compressor"
+  s.add_runtime_dependency "sass"
 end

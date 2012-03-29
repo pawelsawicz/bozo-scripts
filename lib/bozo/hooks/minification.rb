@@ -41,7 +41,7 @@ module Bozo::Hooks
 
     protected
 
-    # Minifies the content
+    # Minifies the content.
     #
     # @param content[String]
     def minify(content)

@@ -1,5 +1,5 @@
 require 'uglifier'
-require 'minification'
+require_relative 'minification'
 
 module Bozo::Hooks
 

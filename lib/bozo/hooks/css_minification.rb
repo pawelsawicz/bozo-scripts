@@ -1,5 +1,5 @@
-require "yui/compressor"
-require 'minification'
+require "sass"
+require_relative 'minification'
 
 module Bozo::Hooks
 
@@ -8,7 +8,6 @@ module Bozo::Hooks
     def initialize
       super
       exclude "**/*.min.css"
-      @compressor = YUI::CssCompressor.new
     end
 
     def file_extension
@@ -16,7 +15,8 @@ module Bozo::Hooks
     end
 
     def minify(css)
-      @compressor.compress css
+      engine = Sass::Engine.new(css, :style => :compressed)
+      engine.render
     end
 
   end
