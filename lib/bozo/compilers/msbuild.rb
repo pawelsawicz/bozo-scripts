@@ -74,12 +74,11 @@ module Bozo::Compilers
     end
     
     def execute
-      projects = project_files('src') | project_files('test')
+      projects = project_files('src')# | project_files('test')
       
       projects.each do |project_file|          
         project = create_project project_file
-        args = project.generate_args configuration
-        execute_command :msbuild, args
+        project.build configuration
       end
     end
     
@@ -108,7 +107,11 @@ module Bozo::Compilers
     def project_class_for(project_file)
       project_types = project_types_from project_file
       web_app_type = '{349c5851-65df-11da-9384-00065b846f21}'
-      project_types.include?(web_app_type) ? WebProject : ClassLibrary
+      if tools_version(project_file) == "3.5"
+        project_types.include?(web_app_type) ? WebProject2008 : ClassLibrary
+      else
+        project_types.include?(web_app_type) ? WebProject2010 : ClassLibrary
+      end
     end
 
     # @return [Array]
@@ -122,6 +125,17 @@ module Bozo::Compilers
 
       project_types
     end
+
+    def tools_version(project_file)
+      tools_version = nil
+
+      File.open(project_file) do |f|
+        element = Nokogiri::XML(f).css('Project').first
+        tools_version = element['ToolsVersion'] unless element.nil?
+      end
+
+      tools_version
+    end
     
   end
 
@@ -129,9 +143,16 @@ module Bozo::Compilers
 
   class Project
 
+    include Bozo::Runner
+
     def initialize(project_file, project_name)
       @project_file = project_file
       @project_name = project_name
+    end
+
+    def build(configuration)
+      args = generate_args configuration
+      execute_command :msbuild, args
     end
 
     def framework_version
@@ -164,18 +185,22 @@ module Bozo::Compilers
       args << "\"#{@project_file}\""
     end
 
+    def windowsize_path(path)
+      path.gsub(/\//, '\\')
+    end
+
   end
 
   class ClassLibrary < Project
 
     def populate_config(config)
       config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version)) + '/'
-      config[:properties][:solutiondir] = File.expand_path('.') + '/'
+      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
 
   end
 
-  class WebProject < Project
+  class WebProject2010 < Project
 
     def populate_config(config)
       config[:targets] << :package
@@ -184,9 +209,40 @@ module Bozo::Compilers
       config[:properties][:packagelocation] = location
       config[:properties][:packageassinglefile] = true
 
-      config[:properties][:solutiondir] = File.expand_path('.') + '/'
+      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
     
+  end
+
+  class WebProject2008 < Project
+
+    require 'zip/zip'
+
+    def build(configuration)
+      super
+
+      Zip::ZipFile.open(location + "/Site.zip", Zip::ZipFile::CREATE) do |zipfile|
+        Dir["#{location}/**/**"].each do |file|
+          zipfile.add(file.sub(location + '/', ''), file)
+        end
+      end
+    end
+
+    def location
+      File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version))
+    end
+
+    def populate_config(config)
+      config[:targets] << :'ResolveReferences'
+      config[:targets] << :'_CopyWebApplication'
+
+      config[:properties][:OutDir] = location + '/bin/'
+      config[:properties][:WebProjectOutputDir] = location
+      config[:properties][:_DebugSymbolsProduced] = false
+
+      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
+    end
+
   end
   
 end
