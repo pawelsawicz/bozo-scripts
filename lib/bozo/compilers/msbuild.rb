@@ -189,12 +189,16 @@ module Bozo::Compilers
       path.gsub(/\//, '\\')
     end
 
+    def location
+      File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version))
+    end
+
   end
 
   class ClassLibrary < Project
 
     def populate_config(config)
-      config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version)) + '/'
+      config[:properties][:outputpath] = location + '/'
       config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
 
@@ -205,8 +209,7 @@ module Bozo::Compilers
     def populate_config(config)
       config[:targets] << :package
 
-      location = File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version)) + '/Site.zip'
-      config[:properties][:packagelocation] = location
+      config[:properties][:packagelocation] = location + '/Site.zip'
       config[:properties][:packageassinglefile] = true
 
       config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
@@ -221,15 +224,23 @@ module Bozo::Compilers
     def build(configuration)
       super
 
-      Zip::ZipFile.open(location + "/Site.zip", Zip::ZipFile::CREATE) do |zipfile|
+      zip_file = zip_location_dir 'Site.zip'
+
+      Dir["#{location}/**/**"].reject { |f| f == zip_file }.each do |file|
+        FileUtils.rm_rf file
+      end
+    end
+
+    def zip_location_dir(zip_file_name)
+      zip_path = location + "/#{zip_file_name}"
+
+      Zip::ZipFile.open(zip_path, Zip::ZipFile::CREATE) do |zipfile|
         Dir["#{location}/**/**"].each do |file|
           zipfile.add(file.sub(location + '/', ''), file)
         end
       end
-    end
 
-    def location
-      File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version))
+      zip_path
     end
 
     def populate_config(config)
