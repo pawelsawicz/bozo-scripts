@@ -248,7 +248,7 @@ module Bozo::Compilers
       config[:targets] << :'_CopyWebApplication'
 
       config[:properties][:OutDir] = location + '/bin/'
-      config[:properties][:WebProjectOutputDir] = location
+      config[:properties][:WebProjectOutputDir] = windowsize_path location
       config[:properties][:_DebugSymbolsProduced] = false
 
       config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
