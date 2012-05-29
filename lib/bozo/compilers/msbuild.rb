@@ -74,7 +74,7 @@ module Bozo::Compilers
     end
     
     def execute
-      projects = project_files('src')# | project_files('test')
+      projects = project_files('src') | project_files('test')
       
       projects.each do |project_file|          
         project = create_project project_file
