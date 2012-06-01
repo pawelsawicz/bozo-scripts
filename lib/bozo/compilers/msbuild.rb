@@ -16,6 +16,7 @@ module Bozo::Compilers
 
       config = defaults.merge @config
       config[:targets] = (@targets or default_targets).clone
+      config[:websites_as_zip] = false
       config
     end
   
@@ -43,6 +44,10 @@ module Bozo::Compilers
 
     def exclude_project(project_name)
       @exclude_projects << project_name
+    end
+
+    def websites_as_zip?
+      @config[:websites_as_zip] = true
     end
 
     # Assign how many cores should be used by msbuild
@@ -224,6 +229,10 @@ module Bozo::Compilers
     def build(configuration)
       super
 
+      zip_website if configuration[:websites_as_zip]
+    end
+
+    def zip_website
       zip_file = zip_location_dir 'Site.zip'
 
       Dir["#{location}/**/**"].reject { |f| f == zip_file }.each do |file|
