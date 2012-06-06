@@ -1,27 +1,27 @@
 module Bozo::Preparers
 
-  # Hook for creating files based upon configuration files and ERB-style
+  # Preparer for creating files based upon configuration files and ERB-style
   # templates before any compilation occurs.
   #
   # == Overview
   #
-  # This hook is primarily intended for generating config files with shared
+  # This preparer is primarily intended for generating config files with shared
   # values but it is capable of generating whatever files you want. Each
-  # instance of the hook is isolated from the anothers so you could specify
-  # multiple hooks to work with different configurations and templates if you
-  # wished.
+  # instance of the preparer is isolated from the anothers so you could specify
+  # multiple preparers to work with different configurations and templates if
+  # you wished.
   #
-  # By default the hook will load <tt>default.rb</tt> followed by
+  # By default the preparer will load <tt>default.rb</tt> followed by
   # <tt>[environment].rb</tt> followed by <tt>[machine_name].rb</tt> from the
   # configured config_path if the file exists. It will then load any files
   # explicitly required through the config_file method.
   #
   # == Hook configuration
   #
-  #   pre_compile :file_templating do |t|
+  #   prepare :file_templating do |t|
   #     t.config_path 'somewhere' # defaults to 'config' if not specified
   #     t.config_file 'my/specific/file.rb' # must be a specific file
-  #     t.source_files 'src/**/*.config.template' # can use glob format
+  #     t.template_files 'src/**/*.config.template' # can use glob format
   #   end
   #
   # Source files are expected to have an additional extension compared to the
@@ -61,7 +61,7 @@ module Bozo::Preparers
   #   Foo is <%= self[:example][:one] %>
   #
   # If a template uses a value that is not specified within the configuration
-  # then the hook will raise an error and halt the build.
+  # then the preparer will raise an error and halt the build.
   class FileTemplating
 
     # Creates a new instance.
