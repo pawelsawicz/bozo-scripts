@@ -16,6 +16,7 @@ module Bozo::Compilers
 
       config = defaults.merge @config
       config[:targets] = (@targets or default_targets).clone
+      config[:websites_as_zip] = false
       config
     end
   
@@ -43,6 +44,10 @@ module Bozo::Compilers
 
     def exclude_project(project_name)
       @exclude_projects << project_name
+    end
+
+    def websites_as_zip?
+      @config[:websites_as_zip] = true
     end
 
     # Assign how many cores should be used by msbuild
@@ -78,8 +83,7 @@ module Bozo::Compilers
       
       projects.each do |project_file|          
         project = create_project project_file
-        args = project.generate_args configuration
-        execute_command :msbuild, args
+        project.build configuration
       end
     end
     
@@ -108,7 +112,11 @@ module Bozo::Compilers
     def project_class_for(project_file)
       project_types = project_types_from project_file
       web_app_type = '{349c5851-65df-11da-9384-00065b846f21}'
-      project_types.include?(web_app_type) ? WebProject : ClassLibrary
+      if tools_version(project_file) == "3.5"
+        project_types.include?(web_app_type) ? WebProject2008 : ClassLibrary
+      else
+        project_types.include?(web_app_type) ? WebProject2010 : ClassLibrary
+      end
     end
 
     # @return [Array]
@@ -122,6 +130,17 @@ module Bozo::Compilers
 
       project_types
     end
+
+    def tools_version(project_file)
+      tools_version = nil
+
+      File.open(project_file) do |f|
+        element = Nokogiri::XML(f).css('Project').first
+        tools_version = element['ToolsVersion'] unless element.nil?
+      end
+
+      tools_version
+    end
     
   end
 
@@ -129,9 +148,16 @@ module Bozo::Compilers
 
   class Project
 
+    include Bozo::Runner
+
     def initialize(project_file, project_name)
       @project_file = project_file
       @project_name = project_name
+    end
+
+    def build(configuration)
+      args = generate_args configuration
+      execute_command :msbuild, args
     end
 
     def framework_version
@@ -164,29 +190,79 @@ module Bozo::Compilers
       args << "\"#{@project_file}\""
     end
 
+    def windowsize_path(path)
+      path.gsub(/\//, '\\')
+    end
+
+    def location
+      File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version))
+    end
+
   end
 
   class ClassLibrary < Project
 
     def populate_config(config)
-      config[:properties][:outputpath] = File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version)) + '/'
-      config[:properties][:solutiondir] = File.expand_path('.') + '/'
+      config[:properties][:outputpath] = location + '/'
+      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
 
   end
 
-  class WebProject < Project
+  class WebProject2010 < Project
 
     def populate_config(config)
       config[:targets] << :package
 
-      location = File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version)) + '/Site.zip'
-      config[:properties][:packagelocation] = location
+      config[:properties][:packagelocation] = location + '/Site.zip'
       config[:properties][:packageassinglefile] = true
 
-      config[:properties][:solutiondir] = File.expand_path('.') + '/'
+      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
     
+  end
+
+  class WebProject2008 < Project
+
+    require 'zip/zip'
+
+    def build(configuration)
+      super
+
+      zip_website if configuration[:websites_as_zip]
+    end
+
+    def zip_website
+      zip_file = zip_location_dir 'Site.zip'
+
+      Dir["#{location}/**/**"].reject { |f| f == zip_file }.each do |file|
+        FileUtils.rm_rf file
+      end
+    end
+
+    def zip_location_dir(zip_file_name)
+      zip_path = location + "/#{zip_file_name}"
+
+      Zip::ZipFile.open(zip_path, Zip::ZipFile::CREATE) do |zipfile|
+        Dir["#{location}/**/**"].each do |file|
+          zipfile.add(file.sub(location + '/', ''), file)
+        end
+      end
+
+      zip_path
+    end
+
+    def populate_config(config)
+      config[:targets] << :'ResolveReferences'
+      config[:targets] << :'_CopyWebApplication'
+
+      config[:properties][:OutDir] = location + '/bin/'
+      config[:properties][:WebProjectOutputDir] = windowsize_path location
+      config[:properties][:_DebugSymbolsProduced] = false
+
+      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
+    end
+
   end
   
 end

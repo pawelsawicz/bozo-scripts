@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "erubis"
   s.add_runtime_dependency "test-unit"
   s.add_runtime_dependency "bozo"
+  s.add_runtime_dependency "zip"
 end
