@@ -71,12 +71,11 @@ module Bozo::Preparers
       @config_files = []
     end
 
-    # Sets the path of the directory within which the hook should look for the
-    # default configuration files.
+    # Sets the path of the directory within which the preparer should look for
+    # the default configuration files.
     #
     # @param [String] path
-    #     The path to the directory containing the default configuration
-    #     files.
+    #     The path to the directory containing the default configuration files.
     def config_path(path)
       @config_path = path
     end
