@@ -3,7 +3,7 @@ require 'nokogiri'
 module Bozo::Compilers
 
   class Msbuild
-      
+
     def config_with_defaults
       defaults = {
         :version => 'v4.0.30319',
@@ -12,34 +12,34 @@ module Bozo::Compilers
         :max_cores => nil
       }
 
-      default_targets = [:clean, :build]
+      default_targets = [:build]
 
       config = defaults.merge @config
       config[:targets] = (@targets or default_targets).clone
       config[:websites_as_zip] = false
       config
     end
-  
+
     def initialize
       @config = {}
       @exclude_projects = []
     end
-  
+
     def version(version)
       @config[:version] = version
     end
-    
+
     def framework(framework)
       @config[:framework] = framework
     end
-    
+
     def solution(path)
       @config[:solution] = path
     end
-    
+
     def property(args)
       @config[:properties] ||= {}
-      @config[:properties] = @config[:properties].merge(args)          
+      @config[:properties] = @config[:properties].merge(args)
     end
 
     def exclude_project(project_name)
@@ -57,41 +57,46 @@ module Bozo::Compilers
     def max_cores(cores)
       @config[:max_cores] = cores
     end
-    
+
     alias :properties :property
-    
+
     def target(target)
       @targets ||= []
       @targets << target
     end
-    
+
     def to_s
       config = configuration
-      "Compile with msbuild #{config[:version]} building #{config[:solution]} with properties #{config[:properties]} for targets #{config[:targets]}"          
+      "Compile with msbuild #{config[:version]} building #{config[:solution]} with properties #{config[:properties]} for targets #{config[:targets]}"
     end
-    
+
     def without_stylecop
       @config[:without_stylecop] = true
     end
-    
+
     def configuration
       config_with_defaults
     end
-    
+
     def execute
-      projects = project_files('src') | project_files('test')
+      projects = (project_files('test') | project_files('src')).map { |file| create_project file }
       
-      projects.each do |project_file|          
-        project = create_project project_file
+      # Clean all the projects first.
+      projects.each do |project|
+        project.clean configuration
+      end
+
+      # Build all the projects so they can utilize each others artifacts.
+      projects.each do |project|
         project.build configuration
       end
     end
-    
+
     def project_files(directory)
       project_file_matcher = File.expand_path(File.join(directory, 'csharp', '**', '*.csproj'))
       Dir[project_file_matcher].select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
     end
-    
+
     def required_tools
       :stylecop unless @config[:without_stylecop]
     end
@@ -141,7 +146,7 @@ module Bozo::Compilers
 
       tools_version
     end
-    
+
   end
 
   private
@@ -156,6 +161,13 @@ module Bozo::Compilers
     end
 
     def build(configuration)
+      populate_config(configuration)
+      args = generate_args configuration
+      execute_command :msbuild, args
+    end
+
+    def clean(configuration)
+      configuration[:targets] = [:clean]
       args = generate_args configuration
       execute_command :msbuild, args
     end
@@ -174,11 +186,10 @@ module Bozo::Compilers
     def generate_args(config)
       args = []
 
-      populate_config(config)
-
       args << File.join(ENV['WINDIR'], 'Microsoft.NET', config[:framework], config[:version], 'msbuild.exe')
       args << '/nologo'
       args << '/verbosity:normal'
+      args << '/nodeReuse:false'
       args << "/target:#{config[:targets].map{|t| t.to_s}.join(';')}"
       args << "/maxcpucount" if config[:max_cores].nil? # let msbuild decide how many cores to use
       args << "/maxcpucount:#{config[:max_cores]}" unless config[:max_cores].nil? # specifying the number of cores
@@ -219,7 +230,7 @@ module Bozo::Compilers
 
       config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
-    
+
   end
 
   class WebProject2008 < Project
@@ -264,5 +275,5 @@ module Bozo::Compilers
     end
 
   end
-  
+
 end
