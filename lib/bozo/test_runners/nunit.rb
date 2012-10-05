@@ -1,7 +1,8 @@
 module Bozo::TestRunners
 
   # A TestRunner for NUnit
-  #
+  # By default the x64 runner is used. If you want to use a different
+  # platform runner then set the platform, e.g. 'x86'.
   #
   # == Dotcover integration
   # To enable integration with the dotcover test runner the following
@@ -17,6 +18,10 @@ module Bozo::TestRunners
     
     def destination(destination)
       @destination = destination
+    end
+
+    def platform(platform)
+      @platform = platform
     end
     
     def project(path)
@@ -39,7 +44,14 @@ module Bozo::TestRunners
     #
     # @returns [String]
     def runner_path
-      nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', 'nunit-console.exe')
+      exe_name = "nunit-console.exe"
+
+      if defined? @platform
+        log_debug "Looking for runner with #@platform platform"
+        exe_name = "nunit-console-#@platform.exe"
+      end
+
+      nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', exe_name)
       raise nunit_runner_not_found if nunit_runners.empty?
       raise multiple_runners_found if nunit_runners.size > 1
 
