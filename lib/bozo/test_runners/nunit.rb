@@ -92,6 +92,11 @@ module Bozo::TestRunners
       FileUtils.mkdir_p File.dirname(report_path)
 
       args << "/xml:\"#{report_path}\""
+
+      if @include.any? && @exclude.any?
+        raise Bozo::ConfigurationError.new 'Both include and exclude categories defined. You cannot specify both for nunit.'
+      end
+
       args << "/include:#{@include.join(',')}" if @include.any?
       args << "/exclude:#{@exclude.join(',')}" if @exclude.any?
 
