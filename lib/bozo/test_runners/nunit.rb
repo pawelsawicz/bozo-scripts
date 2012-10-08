@@ -14,6 +14,8 @@ module Bozo::TestRunners
   
     def initialize
       @projects = []
+      @include = []
+      @exclude = []
     end
     
     def destination(destination)
@@ -34,6 +36,16 @@ module Bozo::TestRunners
 
     def coverage(coverage)
       @coverage = coverage
+    end
+
+    def include(include)
+      cannot_define_both_include_and_exclude_categories if @exclude.any?
+      @include << include
+    end
+
+    def exclude(exclude)
+      cannot_define_both_include_and_exclude_categories if @include.any?
+      @exclude << exclude
     end
     
     def to_s
@@ -82,6 +94,8 @@ module Bozo::TestRunners
       FileUtils.mkdir_p File.dirname(report_path)
 
       args << "/xml:\"#{report_path}\""
+      args << "/include:#{@include.join(',')}" if @include.any?
+      args << "/exclude:#{@exclude.join(',')}" if @exclude.any?
 
       args
     end
@@ -106,6 +120,10 @@ module Bozo::TestRunners
     
     def expand_and_glob(*args)
       Dir[expand_path(*args)]
+    end
+
+    def cannot_define_both_include_and_exclude_categories
+      raise Bozo::ConfigurationError.new 'Both include and exclude categories defined. You cannot specify both for nunit.'
     end
   
   end
