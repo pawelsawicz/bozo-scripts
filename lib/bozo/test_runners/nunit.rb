@@ -14,6 +14,8 @@ module Bozo::TestRunners
   
     def initialize
       @projects = []
+      @include = []
+      @exclude = []
     end
     
     def destination(destination)
@@ -34,6 +36,14 @@ module Bozo::TestRunners
 
     def coverage(coverage)
       @coverage = coverage
+    end
+
+    def include(include)
+      @include << include
+    end
+
+    def exclude(exclude)
+      @exclude << exclude
     end
     
     def to_s
@@ -82,6 +92,8 @@ module Bozo::TestRunners
       FileUtils.mkdir_p File.dirname(report_path)
 
       args << "/xml:\"#{report_path}\""
+      args << "/include:#{@include.join(',')}" if @include.any?
+      args << "/exclude:#{@exclude.join(',')}" if @exclude.any?
 
       args
     end
