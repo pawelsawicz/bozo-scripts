@@ -160,7 +160,7 @@ module Bozo::Packagers
     end
 
     def files
-      %w{dll xml}.map do |extension|
+      %w{dll pdb xml}.map do |extension|
         {:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', "#{@name}.#{extension}")).gsub(/\//, '\\'), :target => 'lib'}
       end
     end
