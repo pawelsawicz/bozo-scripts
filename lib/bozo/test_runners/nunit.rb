@@ -1,7 +1,8 @@
 module Bozo::TestRunners
 
   # A TestRunner for NUnit
-  #
+  # By default the x64 runner is used. If you want to use a different
+  # platform runner then set the platform, e.g. 'x86'.
   #
   # == Dotcover integration
   # To enable integration with the dotcover test runner the following
@@ -13,10 +14,16 @@ module Bozo::TestRunners
   
     def initialize
       @projects = []
+      @include = []
+      @exclude = []
     end
     
     def destination(destination)
       @destination = destination
+    end
+
+    def platform(platform)
+      @platform = platform
     end
     
     def project(path)
@@ -30,6 +37,16 @@ module Bozo::TestRunners
     def coverage(coverage)
       @coverage = coverage
     end
+
+    def include(include)
+      cannot_define_both_include_and_exclude_categories if @exclude.any?
+      @include << include
+    end
+
+    def exclude(exclude)
+      cannot_define_both_include_and_exclude_categories if @include.any?
+      @exclude << exclude
+    end
     
     def to_s
       "Run tests with nunit against projects #{@projects}"
@@ -39,7 +56,14 @@ module Bozo::TestRunners
     #
     # @returns [String]
     def runner_path
-      nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', 'nunit-console.exe')
+      exe_name = "nunit-console.exe"
+
+      if defined? @platform
+        log_debug "Looking for runner with #@platform platform"
+        exe_name = "nunit-console-#@platform.exe"
+      end
+
+      nunit_runners = expand_and_glob('packages', 'NUnit*', 'tools', exe_name)
       raise nunit_runner_not_found if nunit_runners.empty?
       raise multiple_runners_found if nunit_runners.size > 1
 
@@ -70,6 +94,8 @@ module Bozo::TestRunners
       FileUtils.mkdir_p File.dirname(report_path)
 
       args << "/xml:\"#{report_path}\""
+      args << "/include:#{@include.join(',')}" if @include.any?
+      args << "/exclude:#{@exclude.join(',')}" if @exclude.any?
 
       args
     end
@@ -94,6 +120,10 @@ module Bozo::TestRunners
     
     def expand_and_glob(*args)
       Dir[expand_path(*args)]
+    end
+
+    def cannot_define_both_include_and_exclude_categories
+      raise Bozo::ConfigurationError.new 'Both include and exclude categories defined. You cannot specify both for nunit.'
     end
   
   end

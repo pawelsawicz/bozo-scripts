@@ -183,7 +183,7 @@ module Bozo::Packagers
       doc = Nokogiri::XML(File.open(package_file))
 
       doc.xpath('//packages/package').map do |node|
-        {:id => node[:id], :version => node[:version]}
+        {:id => node[:id], :version => "[#{node[:version]}]"}
       end
     end
 
