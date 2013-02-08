@@ -25,7 +25,7 @@ module Bozo::Compilers
       @exclude_projects = []
     end
 
-    def version(version)
+    def clr_version(version)
       @config[:version] = version
     end
 
