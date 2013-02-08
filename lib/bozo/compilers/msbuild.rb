@@ -2,6 +2,14 @@ require 'nokogiri'
 
 module Bozo::Compilers
 
+  # A compiler for msbuild
+  #
+  # By default all .csproj are compiled. This can be
+  # filtered using `include_project` and `exclude_project`.
+  #
+  #   include_project - only specified projects are compiled.
+  #   exclude_project - excludes specified projects (even if they
+  #     are specified by `include_project`
   class Msbuild
 
     def config_with_defaults
@@ -23,6 +31,7 @@ module Bozo::Compilers
     def initialize
       @config = {}
       @exclude_projects = []
+      @include_projects = []
     end
 
     def clr_version(version)
@@ -44,6 +53,10 @@ module Bozo::Compilers
 
     def exclude_project(project_name)
       @exclude_projects << project_name
+    end
+
+    def include_project(project_name)
+      @include_projects << project_name
     end
 
     def websites_as_zip?
@@ -94,7 +107,13 @@ module Bozo::Compilers
 
     def project_files(directory)
       project_file_matcher = File.expand_path(File.join(directory, 'csharp', '**', '*.csproj'))
-      Dir[project_file_matcher].select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
+      projects = Dir[project_file_matcher]
+
+      if @include_projects.any?
+        projects = projects.select { |p| @include_projects.include?(File.basename p, '.csproj') }
+      end
+
+      projects.select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
     end
 
     def required_tools
