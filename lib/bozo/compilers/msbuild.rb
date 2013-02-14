@@ -5,11 +5,11 @@ module Bozo::Compilers
   # A compiler for msbuild
   #
   # By default all .csproj are compiled. This can be
-  # filtered using `include_project` and `exclude_project`.
+  # filtered using `only` and `exclude_project`.
   #
-  #   include_project - only specified projects are compiled.
+  #   only - only specified projects are compiled.
   #   exclude_project - excludes specified projects (even if they
-  #     are specified by `include_project`
+  #     are specified by `only`
   class Msbuild
 
     def config_with_defaults
@@ -31,7 +31,7 @@ module Bozo::Compilers
     def initialize
       @config = {}
       @exclude_projects = []
-      @include_projects = []
+      @only_projects = []
     end
 
     def clr_version(version)
@@ -55,8 +55,8 @@ module Bozo::Compilers
       @exclude_projects << project_name
     end
 
-    def include_project(project_name)
-      @include_projects << project_name
+    def only(project_name)
+      @only_projects << project_name
     end
 
     def websites_as_zip?
@@ -109,8 +109,8 @@ module Bozo::Compilers
       project_file_matcher = File.expand_path(File.join(directory, 'csharp', '**', '*.csproj'))
       projects = Dir[project_file_matcher]
 
-      if @include_projects.any?
-        projects = projects.select { |p| @include_projects.include?(File.basename p, '.csproj') }
+      if @only_projects.any?
+        projects = projects.select { |p| @only_projects.include?(File.basename p, '.csproj') }
       end
 
       projects.select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
