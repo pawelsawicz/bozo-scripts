@@ -113,7 +113,7 @@ module Bozo::Compilers
         projects = projects.select { |p| @only_projects.include?(File.basename p, '.csproj') }
       end
 
-      projects.select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
+      projects.reject { |p| @exclude_projects.include?(File.basename p, '.csproj') }
     end
 
     def required_tools
