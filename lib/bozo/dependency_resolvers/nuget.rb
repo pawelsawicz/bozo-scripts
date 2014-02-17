@@ -6,6 +6,7 @@ module Bozo::DependencyResolvers
     # Creates a new instance.
     def initialize
       @sources = []
+      @packages_to_update = []
     end
 
     # Add a URL that should be within the machine's configuration for
@@ -15,6 +16,10 @@ module Bozo::DependencyResolvers
     #     A NuGet package resolving URL.
     def source(url)
       @sources << url
+    end
+
+    def packages_to_update(packages)
+      @packages_to_update.push *packages
     end
 
     # Returns the build tools required for this dependency resolver to run
@@ -31,6 +36,8 @@ module Bozo::DependencyResolvers
       install_packages 'test', '**', 'packages.config'
       install_packages 'src', '**', 'packages.config'
       install_packages 'packages.config'
+
+      update_internal_packages
     end
 
     private
@@ -73,6 +80,23 @@ module Bozo::DependencyResolvers
         
         log_debug "Resolving nuget dependencies for #{path}"
         
+        execute_command :nuget, args
+      end
+    end
+
+    def update_internal_packages
+      
+      @packages_to_update.each do |package|
+        args = []
+        
+        args << nuget_path
+        args << 'update'
+        args << package
+        args << '-OutputDirectory'
+        args << "\"#{File.expand_path(File.join('packages'))}\""
+
+        log_debug "Updating internal package #{package}"
+
         execute_command :nuget, args
       end
     end
