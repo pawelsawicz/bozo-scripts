@@ -98,10 +98,10 @@ module Bozo::DependencyResolvers
           # Nuget will fail if you try to update a package not present in the packages.config
           file_contents = File.read(path)
           if file_contents.include? "\"#{package}\""
-            puts "Found #{package} in #{path}"
+            log_debug "Found #{package} in #{path}"
             packages_found_in_path << "#{package}"
           else
-            puts "Did NOT find #{package} in #{path}"
+            log_debug "Did NOT find #{package} in #{path}"
           end
         end
 
