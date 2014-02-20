@@ -37,7 +37,9 @@ module Bozo::DependencyResolvers
       install_packages 'src', '**', 'packages.config'
       install_packages 'packages.config'
 
-      update_internal_packages
+      update_internal_packages 'test', '**', 'packages.config'
+      update_internal_packages 'src', '**', 'packages.config'
+      update_internal_packages 'packages.config'
     end
 
     private
@@ -84,20 +86,42 @@ module Bozo::DependencyResolvers
       end
     end
 
-    def update_internal_packages
-      
-      @packages_to_update.each do |package|
-        args = []
+    def update_internal_packages(*args)
+      path_matcher = File.expand_path(File.join(args))
+      Dir[path_matcher].reject { |filename| filename.include? "/obj/" }.each do |path|
         
-        args << nuget_path
-        args << 'update'
-        args << package
-        args << '-OutputDirectory'
-        args << "\"#{File.expand_path(File.join('packages'))}\""
+        # if none of the specified packages are found in the current packages.config, do nothing
+        packages_found_in_path = [];
 
-        log_debug "Updating internal package #{package}"
+        @packages_to_update.each do |package|
+          # make sure the packages.config file contains an entry for each package.
+          # Nuget will fail if you try to update a package not present in the packages.config
+          file_contents = File.read(path)
+          if file_contents.include? "\"#{package}\""
+            puts "Found #{package} in #{path}"
+            packages_found_in_path << "#{package}"
+          else
+            puts "Did NOT find #{package} in #{path}"
+          end
+        end
 
-        execute_command :nuget, args
+        if !packages_found_in_path.empty?
+          args = []
+          args << nuget_path
+          args << 'update'
+          args << "\"#{path}\""
+
+          args << '-Id'
+          packages_found_in_path.each do |package|
+            args << "\"#{package}\""
+          end
+          args << '-RepositoryPath'
+          args << "\"#{File.expand_path(File.join('packages'))}\""
+
+          log_debug "Updating internal packages in #{path}"
+
+          execute_command :nuget, args
+        end
       end
     end
     
