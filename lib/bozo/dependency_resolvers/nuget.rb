@@ -19,7 +19,7 @@ module Bozo::DependencyResolvers
     end
 
     def packages_to_update(packages)
-      @packages_to_update.push *packages
+      @packages_to_update = packages
     end
 
     # Returns the build tools required for this dependency resolver to run
@@ -40,6 +40,10 @@ module Bozo::DependencyResolvers
       update_internal_packages 'test', '**', 'packages.config'
       update_internal_packages 'src', '**', 'packages.config'
       update_internal_packages 'packages.config'
+
+      update_internal_packages 'test', '**', '*.csproj'
+      update_internal_packages 'src', '**', '*.csproj'
+      update_internal_packages '*.csproj'
     end
 
     private
@@ -89,39 +93,20 @@ module Bozo::DependencyResolvers
     def update_internal_packages(*args)
       path_matcher = File.expand_path(File.join(args))
       Dir[path_matcher].reject { |filename| filename.include? "/obj/" }.each do |path|
-        
-        # if none of the specified packages are found in the current packages.config, do nothing
-        packages_found_in_path = [];
 
-        @packages_to_update.each do |package|
-          # make sure the packages.config file contains an entry for each package.
-          # Nuget will fail if you try to update a package not present in the packages.config
+        @packages_to_update.each do |key, version|
           file_contents = File.read(path)
-          if file_contents.include? "\"#{package}\""
-            log_debug "Found #{package} in #{path}"
-            packages_found_in_path << "#{package}"
-          else
-            log_debug "Did NOT find #{package} in #{path}"
-          end
+          # Update version in packages.config files
+          updated = file_contents.gsub(/[Ii]d="#{Regexp.escape(key)}" [Vv]ersion="\d+\.\d+\.\d+"/, "id=\"#{key}\" version=\"#{version}\"")
+          # Update version in *.csproj files (reference name)
+          updated = updated.gsub(/<[Rr]eference [Ii]nclude="#{Regexp.escape(key)}, [Vv]ersion=\d+\.\d+\.\d+\.\d+/, "<Reference Include=\"#{key}, Version=#{version}.0")
+          # Update version in *.csproj files (reference hint path... or any mention of the package between back slashes)
+          updated = updated.gsub(/\\#{Regexp.escape(key)}\.\d+\.\d+\.\d+\\/, "\\#{key}.#{version}\\")
+
+          File.open(path, 'w') { |file| file.write(updated) }
         end
 
-        if !packages_found_in_path.empty?
-          args = []
-          args << nuget_path
-          args << 'update'
-          args << "\"#{path}\""
-
-          args << '-Id'
-          packages_found_in_path.each do |package|
-            args << "\"#{package}\""
-          end
-          args << '-RepositoryPath'
-          args << "\"#{File.expand_path(File.join('packages'))}\""
-
-          log_debug "Updating internal packages in #{path}"
-
-          execute_command :nuget, args
-        end
+        log_debug "Updating internal packages in #{path}"
       end
     end
     
