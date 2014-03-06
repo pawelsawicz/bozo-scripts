@@ -7,3 +7,4 @@ scratch
 build
 .DS_Store
 dist/
+bin/
