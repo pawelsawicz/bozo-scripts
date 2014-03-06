@@ -14,10 +14,10 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "bozo-scripts"
 
-  s.files         = `git ls-files -- {*/**/*,VERSION,LICENSE}`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib"]
+  s.files         = Dir['lib/**/*'] + Dir['VERSION'] + Dir['LICENSE']
+  s.test_files    = Dir['test/**/*'] + Dir['spec/**/*'] + Dir['features/**/*']
+  s.executables   = []
+  s.require_paths = ['lib']
 
   s.add_runtime_dependency "nokogiri", '~> 1.5.1'
   s.add_runtime_dependency "erubis", '~> 2.7.0'
