@@ -14,6 +14,7 @@ module Bozo::Hooks
   #
   class GitHub
     require 'net/http'
+    require 'openssl'
     require 'json'
 
     def pre_build
@@ -67,6 +68,7 @@ module Bozo::Hooks
 
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       http.post(uri.request_uri, data, header)
 
       log_info "Notified GitHub of #{state} - #{description} - #{build_url}"
