@@ -26,7 +26,7 @@ module Bozo::Hooks
     end
 
     def failed_build
-      submit_notification(:failed, "Build #{build_number} failed")
+      submit_notification(:failure, "Build #{build_number} failed")
     end
 
     def token(token)
