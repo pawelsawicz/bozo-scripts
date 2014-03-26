@@ -6,6 +6,7 @@ module Bozo::Hooks
       if Jenkins.hosted_in_jenkins?
         env['BUILD_URL'] = ENV['BUILD_URL']
         env['BUILD_NUMBER'] = ENV['BUILD_NUMBER']
+        env['BUILD_NAME'] = ENV['JOB_NAME']
       end
     end
 
