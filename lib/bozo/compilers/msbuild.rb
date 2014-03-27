@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'fileutils'
 
 module Bozo::Compilers
 
@@ -170,6 +171,8 @@ module Bozo::Compilers
       configuration[:targets] = [:clean]
       args = generate_args configuration
       execute_command :msbuild, args
+
+      remove_obj_directory
     end
 
     def framework_version
@@ -207,6 +210,23 @@ module Bozo::Compilers
 
     def location
       File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version))
+    end
+
+    private
+
+    def remove_obj_directory
+      if Dir.exists?(obj_directory)
+        log_info "Removing #{obj_directory}"
+        FileUtils.rm_rf obj_directory
+      end
+    end
+
+    def obj_directory
+      File.join(project_path, 'obj')
+    end
+
+    def project_path
+      File.dirname(@project_file)
     end
 
   end
