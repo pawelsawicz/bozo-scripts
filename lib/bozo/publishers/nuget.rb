@@ -3,7 +3,7 @@ require 'fileutils'
 module Bozo::Publishers
 
   # Publisher that pushes package to nuget
-  class NugetPush
+  class Nuget
 
     def initialize
       @package_directories = []
