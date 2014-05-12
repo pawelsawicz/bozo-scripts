@@ -16,19 +16,33 @@ module Bozo::Packagers
     private
 
     def build_gem(spec)
-      version_file = File.expand_path(File.dirname(File.realpath(__FILE__)) + '/../../../VERSION')
-
       if pre_release?
-        File.open(version_file, 'w') { |f| f << "#{version}.pre#{env['GIT_HASH']}" }
+        package_version.write_to_file
       end
 
       begin
         execute_command :rubygems, ['gem', 'build', spec]
       ensure
         if pre_release?
-          File.open(version_file, 'w') { |f| f << version.to_s }
+          version.write_to_file
         end
       end
+    end
+
+    def package_version
+      RubyGemVersion.parse(env['BUILD_VERSION'])
+    end
+
+    class RubyGemVersion < Bozo::Versioning::Version
+
+      def self.parse(version)
+        new version.major, version.minor, version.patch, version.extension
+      end
+
+      def to_s
+        "#{major}.#{minor}.#{patch}.#{extension}"
+      end
+
     end
 
   end
