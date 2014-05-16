@@ -11,11 +11,11 @@ module Bozo::Hooks
       tag_name = "rel-#{env['BUILD_VERSION']}"
 
       if `git tag`.split("\n").include? tag_name
-        raise Bozo::ConfigurationError.new "The tag #{tag_name} already exists"
+        log_warn "The tag #{tag_name} already exists"
+      else
+        execute_command :git, ['git', 'tag', tag_name]
+        execute_command :git, ['git', 'push', '--tags']
       end
-
-      execute_command :git, ['git', 'tag', tag_name]
-      execute_command :git, ['git', 'push', '--tags']
     end
 
   end
