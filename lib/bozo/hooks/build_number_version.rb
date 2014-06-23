@@ -1,6 +1,6 @@
 module Bozo::Hooks
 
-  class NugetVersion
+  class BuildNumberVersion
 
   	def post_dependencies
       env['GIT_HASH_FULL'] = `git log -1 --format="%H"`.strip
