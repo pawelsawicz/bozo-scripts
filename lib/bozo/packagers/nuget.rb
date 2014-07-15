@@ -14,7 +14,7 @@ module Bozo::Packagers
       @destination = destination
     end
     
-    def library(project, extfiles = [])
+    def library(project, *extfiles)
       @libraries << LibraryPackage.new(project, extfiles, self)
     end
 
