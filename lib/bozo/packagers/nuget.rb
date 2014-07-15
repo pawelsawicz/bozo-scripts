@@ -14,8 +14,8 @@ module Bozo::Packagers
       @destination = destination
     end
     
-    def library(project)
-      @libraries << LibraryPackage.new(project, self)
+    def library(project, extfiles = [])
+      @libraries << LibraryPackage.new(project, extfiles, self)
     end
 
     def executable(project)
@@ -140,9 +140,10 @@ module Bozo::Packagers
 
   class LibraryPackage
 
-    def initialize(project, nuget)
+    def initialize(project, extfiles, nuget)
       @name = project
       @nuget = nuget
+      @extfiles = extfiles
     end
 
     def name
@@ -154,9 +155,17 @@ module Bozo::Packagers
     end
 
     def files
+      files = []
+
       %w{dll pdb xml}.map do |extension|
-        {:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', "#{@name}.#{extension}")).gsub(/\//, '\\'), :target => 'lib'}
+        files << {:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', "#{@name}.#{extension}")).gsub(/\//, '\\'), :target => 'lib'}
       end
+
+      @extfiles.map do |file|
+        files << {:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', file)).gsub(/\//, '\\'), :target => 'lib'}
+      end
+
+      files
     end
 
     private
