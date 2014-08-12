@@ -4,14 +4,15 @@ module Bozo::Hooks
 
   	def post_dependencies
       env['GIT_HASH_FULL'] = `git log -1 --format="%H"`.strip
-      env['BUILD_VERSION'] = build_version
-  	end
+      env['BUILD_VERSION']= build_version
+      build_version.write_to_file
+    end
 
   	private
 
   	def build_version
-  	  if pre_release?
-  	  	Bozo::Versioning::Version.new(env['BUILD_NUMBER'],0,0)
+  	  if env['BUILD_NUMBER']
+  	  	Bozo::Versioning::Version.new(version.major, version.minor, env['BUILD_NUMBER'])
   	  else
   	  	version
   	  end
