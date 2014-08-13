@@ -5,7 +5,7 @@ module Bozo::Hooks
   	def post_dependencies
       env['GIT_HASH_FULL'] = `git log -1 --format="%H"`.strip
       env['BUILD_VERSION']= build_version
-      build_version.write_to_file
+      build_version.write_to_file "NEW_VERSION"
     end
 
   	private
