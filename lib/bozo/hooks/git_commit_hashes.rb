@@ -2,7 +2,7 @@ module Bozo::Hooks
 
   class GitCommitHashes
     
-    def post_dependencies
+    def pre_prepare
       env['GIT_HASH'] = `git log -1 --format="%h"`.strip
       env['GIT_HASH_FULL'] = `git log -1 --format="%H"`.strip
       env['BUILD_VERSION'] = build_version
