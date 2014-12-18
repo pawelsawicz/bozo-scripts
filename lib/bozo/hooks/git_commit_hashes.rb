@@ -6,7 +6,7 @@ module Bozo::Hooks
       env['GIT_HASH'] = `git log -1 --format="%h"`.strip
       env['GIT_HASH_FULL'] = `git log -1 --format="%H"`.strip
       env['BUILD_VERSION'] = version
-      env['FULL_BUILD_VERSION'] = build_version
+      env['BUILD_VERSION_FULL'] = build_version
     end
 
     private
