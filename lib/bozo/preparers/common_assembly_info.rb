@@ -14,8 +14,10 @@ module Bozo::Preparers
       trademark = computer_name ? "#{computer_name} #{git_hash}" : git_hash
       path = File.expand_path(File.join('build', 'CommonAssemblyInfo.cs'))
       build_version = env['BUILD_VERSION']
+      FULL_BUILD_VERSION = env['FULL_BUILD_VERSION']
 
-      log_debug "Version: #{build_version}"
+      log_debug "Version: #{version}"
+      log_debug "Information Version: #{build_version}"
       log_debug "Commit hash: #{git_hash}"
       log_debug "Computer name: #{computer_name}" if computer_name
       log_debug "Path: #{path}"
@@ -26,6 +28,7 @@ module Bozo::Preparers
         f << "[assembly: AssemblyCompany(\"#{@company_name}\")]\n"
         f << "[assembly: AssemblyVersion(\"#{build_version}\")]\n"
         f << "[assembly: AssemblyFileVersion(\"#{build_version}\")]\n"
+        f << "[assembly: AssemblyInformationalVersion(\"#{FULL_BUILD_VERSION}\")]\n"
         f << "[assembly: AssemblyTrademark(\"#{trademark}\")]"
       end
     end
