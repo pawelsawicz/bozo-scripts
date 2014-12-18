@@ -30,7 +30,7 @@ module Bozo::Packagers
     end
 
     def package_version
-      RubyGemVersion.parse(env['BUILD_VERSION'])
+      RubyGemVersion.parse(env['BUILD_VERSION_FULL'])
     end
 
     class RubyGemVersion < Bozo::Versioning::Version

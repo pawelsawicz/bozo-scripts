@@ -54,7 +54,7 @@ module Bozo::Packagers
 
     # Returns the version that the package should be given.
     def package_version
-      env['BUILD_VERSION']
+      env['BUILD_VERSION_FULL']
     end
 
     private
