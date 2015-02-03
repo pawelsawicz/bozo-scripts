@@ -16,7 +16,33 @@ module Bozo::Packagers
     private
 
     def build_gem(spec)
-      execute_command :rubygems, ['gem', 'build', spec]
+      if pre_release?
+        package_version.write_to_file
+      end
+
+      begin
+        execute_command :rubygems, ['gem', 'build', spec]
+      ensure
+        if pre_release?
+          version.write_to_file
+        end
+      end
+    end
+
+    def package_version
+      RubyGemVersion.parse(env['BUILD_VERSION_FULL'])
+    end
+
+    class RubyGemVersion < Bozo::Versioning::Version
+
+      def self.parse(version)
+        new version.major, version.minor, version.patch, version.extension
+      end
+
+      def to_s
+        "#{major}.#{minor}.#{patch}.#{extension}"
+      end
+
     end
 
   end

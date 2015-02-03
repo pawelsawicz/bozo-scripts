@@ -4,5 +4,5 @@ source "http://rubygems.org"
 gemspec
 
 group :development do
-  gem "bozo", :git => "git@github.com:zopaUK/bozo.git"
+  #gem "bozo", :git => "git@github.com:zopaUK/bozo.git"
 end
