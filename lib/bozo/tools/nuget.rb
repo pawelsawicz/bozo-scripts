@@ -5,7 +5,7 @@ module Bozo::Tools
 
     # Creates a new instance.
     def initialize
-      @url = 'http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=nuget&DownloadId=697144&FileTime=130190897355830000&Build=20669'
+      @url = 'http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=nuget&DownloadId=697144&FileTime=130190897355830000&Build=20959'
     end
 
     # Sets the source url for the nuget tool to be retreived from
