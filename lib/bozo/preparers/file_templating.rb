@@ -153,15 +153,13 @@ module Bozo::Preparers
 
     # Adds the templates to the templating coordinator.
     def add_templates(coordinator)
+      exclude = @exclude_globs.map { |glob| Dir[glob] }.flatten
+
       @template_globs.each do |glob|
         Dir[glob].each do |file|
-          coordinator.template_file file unless excluded_file?(file)
+          coordinator.template_file file unless exclude.include?(file)
         end
       end
-    end
-
-    def excluded_file?(file)
-      @exclude_globs.any? { |glob| Dir[glob].include? (file) }
     end
 
   end
