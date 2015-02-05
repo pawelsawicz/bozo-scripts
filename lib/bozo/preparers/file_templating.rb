@@ -22,6 +22,7 @@ module Bozo::Preparers
   #     t.config_path 'somewhere' # defaults to 'config' if not specified
   #     t.config_file 'my/specific/file.rb' # must be a specific file
   #     t.template_files 'src/**/*.config.template' # can use glob format
+  #     t.exclude_files 'src/**/obj/*' # can exclude specific files
   #   end
   #
   # Source files are expected to have an additional extension compared to the
@@ -69,6 +70,7 @@ module Bozo::Preparers
       @config_path = 'config'
       @template_globs = []
       @config_files = []
+      @exclude_globs = []
     end
 
     # Sets the path of the directory within which the preparer should look for
@@ -95,6 +97,15 @@ module Bozo::Preparers
     #     templating engine.
     def template_files(glob)
       @template_globs << glob
+    end
+
+    # Adds a set of templates files from which to exclude from templating.
+    #
+    # @param [String] glob
+    #     A glob that points to a set of files that should be excluded from
+    #     the templating engine.
+    def exclude_files(glob)
+      @exclude_globs << glob
     end
 
     # Generate all the files matching the configuration.
@@ -142,8 +153,12 @@ module Bozo::Preparers
 
     # Adds the templates to the templating coordinator.
     def add_templates(coordinator)
+      exclude = @exclude_globs.map { |glob| Dir[glob] }.flatten
+
       @template_globs.each do |glob|
-        coordinator.template_files glob
+        Dir[glob].each do |file|
+          coordinator.template_file file unless exclude.include?(file)
+        end
       end
     end
 
