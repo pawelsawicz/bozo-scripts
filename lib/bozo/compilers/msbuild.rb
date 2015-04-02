@@ -168,8 +168,10 @@ module Bozo::Compilers
     end
 
     def clean(configuration)
-      configuration[:targets] = [:clean]
-      args = generate_args configuration
+      config = configuration.dup
+      config.delete(:max_cores)
+      config[:targets] = [:clean]
+      args = generate_args config
       execute_command :msbuild, args
 
       remove_obj_directory
@@ -194,6 +196,7 @@ module Bozo::Compilers
       args << '/verbosity:normal'
       args << '/nodeReuse:false'
       args << "/target:#{config[:targets].map{|t| t.to_s}.join(';')}"
+      args << "/p:StyleCopEnabled=false" if config[:without_stylecop]
       args << "/maxcpucount" if config[:max_cores].nil? # let msbuild decide how many cores to use
       args << "/maxcpucount:#{config[:max_cores]}" unless config[:max_cores].nil? # specifying the number of cores
 
