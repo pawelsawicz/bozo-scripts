@@ -98,10 +98,6 @@ module Bozo::Compilers
       Dir[project_file_matcher].select { |p| not @exclude_projects.include?(File.basename p, '.csproj') }
     end
 
-    def required_tools
-      :stylecop unless @config[:without_stylecop]
-    end
-
     private
 
     # Creates a project based on the project_file type.
