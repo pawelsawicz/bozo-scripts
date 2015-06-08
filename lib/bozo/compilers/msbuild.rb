@@ -34,6 +34,10 @@ module Bozo::Compilers
       @config[:framework] = framework
     end
 
+    def msbuild_path(msbuild_path)
+      @config[:msbuild_path] = msbuild_path
+    end
+
     def solution(path)
       @config[:solution] = path
     end
@@ -184,10 +188,36 @@ module Bozo::Compilers
       framework_version
     end
 
+    def windows_path
+      to_unix_path(ENV['WINDIR'])
+    end
+
+    def default_msbuild_path(config)
+      File.join(windows_path, 'Microsoft.NET', config[:framework], config[:version], 'msbuild.exe')
+    end
+
+    def program_files
+      globalArch = ENV['PROCESSOR_ARCHITECTURE']
+      to_unix_path(
+        ENV[globalArch == 'AMD64' ? 'ProgramFiles(x86)' : 'ProgramFiles'])
+    end
+
+    def msbuild_path
+      [ File.join(program_files, 'MSBuild/14.0/Bin'),
+        File.join(program_files, 'MSBuild/12.0/Bin'),
+        File.join(program_files, 'MSBuild/12.0/Bin/amd64'),
+        File.join(windows_path, 'Microsoft.NET/Framework/v4.0.30319'),
+        File.join(windows_path, 'Microsoft.NET/Framework/v4.0.30128'),
+        File.join(windows_path, 'Microsoft.NET/Framework/v3.5')].
+          collect {|p| File.join(p, 'MSBuild.exe')}.
+          find {|p| File.exists?(p)}
+    end
+
     def generate_args(config)
       args = []
+      msbuild = config[:msbuild_path] || msbuild_path || default_msbuild_path(config)
 
-      args << File.join(ENV['WINDIR'], 'Microsoft.NET', config[:framework], config[:version], 'msbuild.exe')
+      args << '"' + msbuild + '"'
       args << '/nologo'
       args << '/verbosity:normal'
       args << '/nodeReuse:false'
@@ -203,8 +233,8 @@ module Bozo::Compilers
       args << "\"#{@project_file}\""
     end
 
-    def windowsize_path(path)
-      path.gsub(/\//, '\\')
+    def to_unix_path(path)
+      path.gsub(/\//, '/')
     end
 
     def location
@@ -234,7 +264,7 @@ module Bozo::Compilers
 
     def populate_config(config)
       config[:properties][:outputpath] = location + '/'
-      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
+      config[:properties][:solutiondir] = to_unix_path(File.expand_path('.') + '/')
     end
 
   end
@@ -247,7 +277,7 @@ module Bozo::Compilers
       config[:properties][:packagelocation] = location + '/Site.zip'
       config[:properties][:packageassinglefile] = true
 
-      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
+      config[:properties][:solutiondir] = to_unix_path(File.expand_path('.') + '/')
     end
 
   end
@@ -287,10 +317,10 @@ module Bozo::Compilers
       config[:targets] << :'_CopyWebApplication'
 
       config[:properties][:OutDir] = location + '/bin/'
-      config[:properties][:WebProjectOutputDir] = windowsize_path location
+      config[:properties][:WebProjectOutputDir] = to_unix_path location
       config[:properties][:_DebugSymbolsProduced] = false
 
-      config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
+      config[:properties][:solutiondir] = to_unix_path(File.expand_path('.') + '/')
     end
 
   end
