@@ -19,7 +19,7 @@ module Bozo::TestRunners
 
         File.join(program_files_path, 'OpenCover', 'OpenCover.Console.exe')
       else
-        File.join(ENV['teamcity.dotCover.home'], 'OpenCover.Console.exe')
+        File.join(ENV['openCover.home'], 'OpenCover.Console.exe')
       end
     end
 
