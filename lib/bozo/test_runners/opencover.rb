@@ -10,17 +10,7 @@ module Bozo::TestRunners
   # produces a separate dotcover output
   class OpenCover
     def self.default_path
-      if ENV['openCover.home'].nil?
-        if ENV['ProgramFiles(x86)'].nil?
-          program_files_path = ENV['ProgramFiles']
-        else
-          program_files_path = ENV['ProgramFiles(x86)']
-        end
-
-        File.join(program_files_path, 'OpenCover', 'OpenCover.Console.exe')
-      else
-        File.join(ENV['openCover.home'], 'OpenCover.Console.exe')
-      end
+      File.join('build', 'tools', 'OpenCover', 'OpenCover.Console.exe')
     end
 
     def initialize
@@ -40,6 +30,12 @@ module Bozo::TestRunners
       return false if path.nil?
 
       File.exist? path
+    end
+
+    # Returns the build tools required for this dependency resolver to run
+    # successfully.
+    def required_tools
+      :open_cover
     end
 
     # Adds a test runner
