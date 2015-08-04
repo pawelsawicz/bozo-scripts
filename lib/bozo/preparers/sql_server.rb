@@ -29,6 +29,10 @@ module Bozo::Preparers
       @script = value
     end
 
+    def database_name(name)
+      @database_name = name
+    end
+
     def connection_string(&value)
       @connection_string = value
     end
@@ -45,7 +49,8 @@ module Bozo::Preparers
       args = []
       args << 'sqlcmd'
       args << "-S #{connection_string}"
-      args << "-i #{@script}"
+      args << "-i #{@script}" if @script
+      args << "-q #{default_script}" if @database_name
       @variables.each do |key, value|
         args << "-v #{key}=#{value}"
       end
@@ -65,6 +70,23 @@ module Bozo::Preparers
       end
 
       configuration
+    end
+
+    def default_script
+      <<-SQL
+      IF EXISTS(select * from sys.databases where name='#{@database_name}')
+      BEGIN
+        -- handle when the database cannot be dropped because it is currently in use
+        ALTER DATABASE #{@database_name} SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+
+        DROP DATABASE #{@database_name}
+      END
+      GO
+
+      -- Create DB
+      CREATE DATABASE [#{@database_name}]
+      GO
+      SQL
     end
 
   end
