@@ -3,19 +3,23 @@ require 'nokogiri'
 module Bozo::Packagers
 
   class Nuget
-    
+
     def initialize
       @libraries = []
       @executables = []
       @websites = []
     end
-    
+
     def destination(destination)
       @destination = destination
     end
-    
+
     def library(project, *extfiles)
       @libraries << LibraryPackage.new(project, extfiles, self)
+    end
+
+    def library_with_option(project, opts = {})
+      @libraries << LibraryPackage.new(project, opts[:extfiles], self, opts[:excluded_packages])
     end
 
     def executable(project)
@@ -25,7 +29,7 @@ module Bozo::Packagers
     def website(project)
       @websites << WebsitePackage.new(project)
     end
-    
+
     def required_tools
       :nuget
     end
@@ -41,11 +45,11 @@ module Bozo::Packagers
     def author(author)
       @author = author
     end
-    
+
     def to_s
       "Publish projects with nuget #{@libraries | @executables | @websites} to #{@destination}"
     end
-    
+
     def execute
       @libraries.each {|project| package project}
       @executables.each {|project| package project}
@@ -63,7 +67,7 @@ module Bozo::Packagers
       spec_path = generate_specification(project)
       create_package(project.name, spec_path, true)
     end
-    
+
     def generate_specification(project)
       log_debug "Generating specification for #{project.name}"
       builder = Nokogiri::XML::Builder.new do |doc|
@@ -93,27 +97,27 @@ module Bozo::Packagers
       File.open(spec_path, 'w+') {|f| f.write(builder.to_xml)}
       spec_path
     end
-    
+
     def create_package(project, spec_path, omit_analysis = false)
       args = []
-      
+
       dist_dir = File.expand_path(File.join('dist', 'nuget'))
-      
+
       args << File.expand_path(File.join('build', 'tools', 'nuget', 'NuGet.exe'))
       args << 'pack'
       args << "\"#{spec_path}\""
       args << '-OutputDirectory'
       args << "\"#{dist_dir}\""
       args << '-NoPackageAnalysis' if omit_analysis
-      
+
       # Ensure the directory is there because Nuget won't make it
       FileUtils.mkdir_p dist_dir
-      
+
       log_debug "Creating nuget package for #{project}"
-      
+
       execute_command :nuget, args
     end
-    
+
   end
 
   private
@@ -140,10 +144,11 @@ module Bozo::Packagers
 
   class LibraryPackage
 
-    def initialize(project, extfiles, nuget)
+    def initialize(project, extfiles, nuget, excluded_references = [])
       @name = project
       @nuget = nuget
       @extfiles = extfiles
+      @excluded_references = excluded_references
     end
 
     def name
@@ -186,7 +191,7 @@ module Bozo::Packagers
       doc = Nokogiri::XML(File.open(package_file))
 
       doc.xpath('//packages/package').map do |node|
-        {:id => node[:id], :version => "[#{node[:version]}]"}
+        {:id => node[:id], :version => "[#{node[:version]}]"} unless @excluded_references.include? node[:id]
       end
     end
 
@@ -225,5 +230,5 @@ module Bozo::Packagers
     end
 
   end
-  
+
 end
