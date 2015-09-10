@@ -19,7 +19,7 @@ module Bozo::Packagers
     end
 
     def library_with_option(project, opts = {})
-      @libraries << LibraryPackage.new(project, opts[:extfiles], self, opts[:excluded_packages])
+      @libraries << LibraryPackage.new(project, opts[:extfiles], self, opts[:excluded_references])
     end
 
     def executable(project)
