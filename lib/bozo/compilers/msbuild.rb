@@ -17,7 +17,7 @@ module Bozo::Compilers
 
       config = defaults.merge @config
       config[:targets] = (@targets or default_targets).clone
-      config[:websites_as_zip] = false
+      config[:websites_as_zip] ||= false
       config
     end
 
@@ -47,7 +47,7 @@ module Bozo::Compilers
       @exclude_projects << project_name
     end
 
-    def websites_as_zip?
+    def websites_as_zip
       @config[:websites_as_zip] = true
     end
 
@@ -207,8 +207,12 @@ module Bozo::Compilers
       path.gsub(/\//, '\\')
     end
 
+    def temp_project_path
+      File.expand_path(File.join('temp', 'msbuild', @project_name))
+    end
+
     def location
-      File.expand_path(File.join('temp', 'msbuild', @project_name, framework_version))
+      File.expand_path(File.join(temp_project_path, framework_version))
     end
 
     private
@@ -244,8 +248,12 @@ module Bozo::Compilers
     def populate_config(config)
       config[:targets] << :package
 
-      config[:properties][:packagelocation] = location + '/Site.zip'
-      config[:properties][:packageassinglefile] = true
+      if config[:websites_as_zip]
+        config[:properties][:packagelocation] = location + '/Site.zip'
+        config[:properties][:packageassinglefile] = true
+      else
+        config[:properties][:_packagetempdir] = temp_project_path
+      end
 
       config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
     end
