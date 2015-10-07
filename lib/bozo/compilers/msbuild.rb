@@ -157,6 +157,10 @@ module Bozo::Compilers
       @project_name = project_name
     end
 
+    def name
+      @project_name
+    end
+
     def build(configuration)
       populate_config(configuration)
       args = generate_args configuration
@@ -215,6 +219,10 @@ module Bozo::Compilers
       File.expand_path(File.join(temp_project_path, framework_version))
     end
 
+    def project_path
+      File.dirname(@project_file)
+    end
+
     private
 
     def remove_obj_directory
@@ -226,10 +234,6 @@ module Bozo::Compilers
 
     def obj_directory
       File.join(project_path, 'obj')
-    end
-
-    def project_path
-      File.dirname(@project_file)
     end
 
   end
@@ -256,6 +260,20 @@ module Bozo::Compilers
       end
 
       config[:properties][:solutiondir] = windowsize_path(File.expand_path('.') + '//')
+    end
+
+    def build(configuration)
+      super(configuration)
+
+      unless configuration[:websites_as_zip]
+        log_info File.join(project_path, '**', 'Web.*.config')
+        Dir[File.join(project_path, '**', 'Web.*.config')].each do |source_file|
+          destination = File.join(temp_project_path, source_file.sub(project_path, ''))
+          log_info "Copying #{source_file} to #{destination}"
+          FileUtils.mkdir_p File.dirname(destination)
+          FileUtils.cp source_file, destination
+        end
+      end
     end
 
   end
