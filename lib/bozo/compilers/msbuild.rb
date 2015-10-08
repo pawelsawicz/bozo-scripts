@@ -5,24 +5,15 @@ module Bozo::Compilers
 
   class Msbuild
 
-    def config_with_defaults
-      defaults = {
+    def initialize
+      @config = {
         :version => 'v4.0.30319',
         :framework => 'Framework64',
         :properties => {:configuration => :release},
-        :max_cores => nil
+        :max_cores => nil,
+        :targets => [:build],
+        :websites_as_zip => false
       }
-
-      default_targets = [:build]
-
-      config = defaults.merge @config
-      config[:targets] = (@targets or default_targets).clone
-      config[:websites_as_zip] ||= false
-      config
-    end
-
-    def initialize
-      @config = {}
       @exclude_projects = []
     end
 
@@ -39,7 +30,6 @@ module Bozo::Compilers
     end
 
     def property(args)
-      @config[:properties] ||= {}
       @config[:properties] = @config[:properties].merge(args)
     end
 
@@ -62,13 +52,11 @@ module Bozo::Compilers
     alias :properties :property
 
     def target(target)
-      @targets ||= []
-      @targets << target
+      @config[:targets] << target
     end
 
     def to_s
-      config = configuration
-      "Compile with msbuild #{config[:version]} building #{config[:solution]} with properties #{config[:properties]} for targets #{config[:targets]}"
+      "Compile with msbuild #{@config[:version]} building #{@config[:solution]} with properties #{@config[:properties]} for targets #{@config[:targets]}"
     end
 
     def without_stylecop
@@ -76,7 +64,7 @@ module Bozo::Compilers
     end
 
     def configuration
-      config_with_defaults
+      Marshal.load(Marshal.dump(@config.dup))
     end
 
     def execute
@@ -168,10 +156,9 @@ module Bozo::Compilers
     end
 
     def clean(configuration)
-      config = configuration.dup
-      config.delete(:max_cores)
-      config[:targets] = [:clean]
-      args = generate_args config
+      configuration.delete(:max_cores)
+      configuration[:targets] = [:clean]
+      args = generate_args configuration
       execute_command :msbuild, args
 
       remove_obj_directory
