@@ -9,7 +9,12 @@ module Bozo::Compilers
       @config = {
         :version => 'v4.0.30319',
         :framework => 'Framework64',
-        :properties => {:configuration => :release},
+        :properties => {
+          :configuration => :release,
+          :debugtype => :pdbonly,
+          :debugsymbols => :true,
+          :optimize => :true
+          },
         :max_cores => nil,
         :targets => [:build],
         :websites_as_zip => false
