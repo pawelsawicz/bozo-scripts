@@ -30,7 +30,9 @@ module Bozo::Publishers
         end
       else
         @packages.each do |package|
-          push File.expand_path(package)
+          Dir[File.join('dist', 'nuget', '**', "#{@package}*")].each do |source_file|
+            push File.expand_path(source_file)
+          end
         end
       end
     end
