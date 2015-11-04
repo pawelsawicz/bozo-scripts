@@ -29,8 +29,10 @@ module Bozo::Publishers
           push File.expand_path(source_file)
         end
       else
+        build_version_full = env['BUILD_VERSION_FULL']
+
         @packages.each do |package|
-          Dir[File.join('dist', 'nuget', '**', "#{@package}*")].each do |source_file|
+          Dir[File.join('dist', 'nuget', "#{package}.#{build_version_full}.nupkg")].each do |source_file|
             push File.expand_path(source_file)
           end
         end
