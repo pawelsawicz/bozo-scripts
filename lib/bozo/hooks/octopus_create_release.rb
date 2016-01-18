@@ -8,6 +8,10 @@ module Bozo::Hooks
       @display_progress = false
     end
 
+    def required_tools
+      :octopustools
+    end
+
     # Specify the name of the Octopus Deploy project to create a release for.
     def project(value)
       @octopus_project = value
@@ -39,6 +43,7 @@ module Bozo::Hooks
       log_info "Creating release in Octopus for #{env['BUILD_VERSION_FULL']}"
 
       args = []
+      args << File.expand_path(File.join('build', 'tools', 'octopustools', 'Octo.exe'))
       args << 'create-release'
       args << "--project \"#{@octopus_project}\""
       args << "--version #{env['BUILD_VERSION_FULL']}"
