@@ -9,7 +9,7 @@ module Bozo::Hooks
     end
 
     def required_tools
-      :octopustools
+      :octopus_tools
     end
 
     # Specify the name of the Octopus Deploy project to create a release for.
