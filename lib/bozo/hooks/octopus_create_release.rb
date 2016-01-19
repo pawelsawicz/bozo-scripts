@@ -49,7 +49,7 @@ module Bozo::Hooks
       args << "--version #{env['BUILD_VERSION_FULL']}"
       args << "--packageversion #{env['BUILD_VERSION_FULL']}"
       args << "--server #{@octopus_server}"
-      args << "--apiKey #{@octopus_api_key}"
+      args << ['--apiKey', Bozo::SensitiveValue.new(@octopus_api_key)]
       args << "--releaseNotes \"[Build #{env['BUILD_VERSION_FULL']}](#{env['BUILD_URL']})\""
 
       if @display_progress
