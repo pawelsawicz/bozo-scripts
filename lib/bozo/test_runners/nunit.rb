@@ -110,7 +110,7 @@ module Bozo::TestRunners
     
     def execute
       if @execute_in_parallel
-        failed_projects = []
+        failed_projects = Queue.new
         threads = []
 
         @projects.each do |project|
@@ -118,7 +118,7 @@ module Bozo::TestRunners
             begin
               execute_command :nunit, [runner_path] << runner_args([project], "#{project}-#{Time.now.to_i}")
             rescue
-              failed_projects << project
+              failed_projects.push(project)
             end
           }
           threads.push(t)
@@ -126,8 +126,13 @@ module Bozo::TestRunners
 
         threads.each(&:join)
 
-        if failed_projects.length > 0
-          raise Bozo::ExecutionError.new(:nunit, [runner_path] << failed_projects, 1)
+        failed = []
+        until failed_projects.empty?
+          failed << failed_projects.pop
+        end
+
+        if failed.length > 0
+          raise Bozo::ExecutionError.new(:nunit, [runner_path] << failed, 1)
         end
       else
         execute_command :nunit, [runner_path] << runner_args
