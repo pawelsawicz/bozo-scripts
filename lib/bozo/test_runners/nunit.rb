@@ -11,11 +11,12 @@ module Bozo::TestRunners
   #   runner_path # should return the path to the runners executable
   #   runner_args # should return the arguments to be passed to use
   class Nunit
-  
+
     def initialize
       @projects = []
       @include = []
       @exclude = []
+      @execute_in_parallel = false
     end
     
     def destination(destination)
@@ -47,6 +48,10 @@ module Bozo::TestRunners
       cannot_define_both_include_and_exclude_categories if @include.any?
       @exclude << exclude
     end
+
+    def execute_in_parallel
+      @execute_in_parallel = true
+    end
     
     def to_s
       "Run tests with nunit against projects #{@projects}"
@@ -77,10 +82,13 @@ module Bozo::TestRunners
     # Returns the arguments required for the runner's executable.
     #
     # @returns [Array]
-    def runner_args
+    def runner_args(projects = nil, report_prefix = nil)
+      projects = @projects if projects.nil?
+      report_prefix = Time.now.to_i if report_prefix.nil?
+
       args = []
 
-      @projects.each do |project|
+      projects.each do |project|
         expand_and_glob('temp', 'msbuild', project, '**', "#{project}.dll").each do |test_dll|
           args << "\"#{test_dll}\""
         end
@@ -88,7 +96,7 @@ module Bozo::TestRunners
       args << '/nologo'
 
       report_path = @report_path
-      report_path = expand_path('temp', 'nunit', "#{Time.now.to_i}-nunit-report.xml") unless report_path
+      report_path = expand_path('temp', 'nunit', "#{report_prefix}-nunit-report.xml") unless report_path
 
       # Ensure the directory is there because NUnit won't make it
       FileUtils.mkdir_p File.dirname(report_path)
@@ -101,7 +109,29 @@ module Bozo::TestRunners
     end
     
     def execute
-      execute_command :nunit, [runner_path] << runner_args
+      if @execute_in_parallel
+        failed_projects = []
+        threads = []
+
+        @projects.each do |project|
+          t = Thread.new {
+            begin
+              execute_command :nunit, [runner_path] << runner_args([project], "#{project}-#{Time.now.to_i}")
+            rescue
+              failed_projects << project
+            end
+          }
+          threads.push(t)
+        end
+
+        threads.each(&:join)
+
+        if failed_projects.length > 0
+          raise Bozo::ExecutionError.new(:nunit, [runner_path] << failed_projects, 1)
+        end
+      else
+        execute_command :nunit, [runner_path] << runner_args
+      end
     end
 
     private
