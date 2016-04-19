@@ -1,0 +1,16 @@
+# Unify coding style for different editors and IDEs
+# See http://EditorConfig.org
+
+root = true
+
+[*.{html,txt}]
+indent_style = space
+indent_size = 2
+end_of_line = crlf
+trim_trailing_whitespace = true
+
+# Use editor defaults for non-emails
+[{config,src}/**]
+indent_style =
+indent_size =
+end_of_line =
