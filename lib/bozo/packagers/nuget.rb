@@ -8,6 +8,7 @@ module Bozo::Packagers
       @libraries = []
       @executables = []
       @websites = []
+      @resources = []
     end
 
     def destination(destination)
@@ -24,6 +25,10 @@ module Bozo::Packagers
 
     def executable(project)
       @executables << ExecutablePackage.new(project)
+    end
+
+    def resource(project, base_directory)
+      @resources << ResourcePackage.new(project, base_directory)
     end
 
     def website(project)
@@ -54,6 +59,7 @@ module Bozo::Packagers
       @libraries.each {|project| package project}
       @executables.each {|project| package project}
       @websites.each {|project| package project}
+      @resources.each {|project| package project}
     end
 
     # Returns the version that the package should be given.
@@ -122,8 +128,26 @@ module Bozo::Packagers
 
   private
 
-  class ExecutablePackage
+  class ResourcePackage
+    def initialize(project, base_directory)
+      @name = project
+      @base_directory = base_directory
+    end
 
+    def name
+      @name
+    end
+
+    def dependencies
+      []
+    end
+
+    def files
+      [{:src => File.expand_path(File.join(@base_directory, '**', '*.*')).gsub(/\//, '\\')}]
+    end
+  end
+
+  class ExecutablePackage
     def initialize(project)
       @name = project
     end
@@ -139,7 +163,6 @@ module Bozo::Packagers
     def files
       [{:src => File.expand_path(File.join('temp', 'msbuild', @name, '**', '*.*')).gsub(/\//, '\\')}]
     end
-
   end
 
   class LibraryPackage
