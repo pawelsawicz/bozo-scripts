@@ -213,9 +213,9 @@ module Bozo::Packagers
 
       doc = Nokogiri::XML(File.open(package_file))
 
-      doc.xpath('//packages/package').map do |node|
-        {:id => node[:id], :version => "[#{node[:version]}]"} unless @excluded_references.include? node[:id]
-      end
+      dependencies = doc.xpath('//packages/package').map do |node|
+        {:id => node[:id], :version => "[#{node[:version]}]"} unless (@excluded_references.include?(node[:id]) || node[:developmentDependency] == "true")
+      end.compact    
     end
 
     def packages_file
